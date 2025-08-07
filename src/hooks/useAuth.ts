@@ -51,11 +51,47 @@ export function useAuth() {
     return { error };
   };
 
-  return { 
-    user, 
-    loading, 
-    signIn, 
-    signUp, 
-    signOut 
+const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      return { success: true };
+    } catch (error: unknown) {
+      console.error('Erro ao enviar email de recuperação:', error);
+      throw error;
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      return { success: true };
+    } catch (error: unknown) {
+      console.error('Erro ao atualizar senha:', error);
+      throw error;
+    }
+  };
+
+  return {
+    user,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+    resetPassword,
+    updatePassword
   };
 }
