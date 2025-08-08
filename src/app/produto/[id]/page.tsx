@@ -1,8 +1,10 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/services/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
+import { addToCart } from '@/utils/cart';
 
 interface Product {
   id: string;
@@ -81,6 +83,25 @@ export default function ProdutoPage() {
     ? (ratings.reduce((acc, r) => acc + r.rating, 0) / ratings.length).toFixed(1)
     : 'Sem avaliações';
 
+
+  // Adicionar ao carrinho
+  const [adding, setAdding] = useState(false);
+  const handleAddToCart = async () => {
+    if (!user) {
+      alert('Você precisa estar logado para adicionar ao carrinho.');
+      return;
+    }
+    setAdding(true);
+    try {
+      await addToCart(user.id, product!.id, 1);
+      alert('Produto adicionado ao carrinho!');
+    } catch (e) {
+      alert('Erro ao adicionar ao carrinho.');
+    } finally {
+      setAdding(false);
+    }
+  };
+
   if (!product) return <div className="p-8">Carregando...</div>;
 
   return (
@@ -94,7 +115,19 @@ export default function ProdutoPage() {
       <div className="mb-2 text-green-700 font-semibold">
         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
       </div>
+
       <div className="mb-4 text-gray-600">Categoria: {product.category}</div>
+
+      {/* Botão Adicionar ao Carrinho */}
+      <div className="mb-6">
+        <button
+          onClick={handleAddToCart}
+          disabled={adding}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60"
+        >
+          {adding ? 'Adicionando...' : 'Adicionar ao carrinho'}
+        </button>
+      </div>
 
       {/* Avaliação */}
       <div className="mb-4">
