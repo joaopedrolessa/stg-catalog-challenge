@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link'; // ← ADICIONAR ESTA LINHA
 import { useAuth } from '../../hooks/useAuth';
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -86,7 +86,6 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen flex items-center justify-center">
       <form onSubmit={handleSubmit} className="max-w-md w-full space-y-4">
         <h2 className="text-2xl font-bold text-center">Nova Senha</h2>
-        
         <input
           type="password"
           placeholder="Nova senha"
@@ -95,7 +94,6 @@ export default function ResetPasswordPage() {
           required
           className="w-full px-3 py-2 border rounded-md"
         />
-        
         <input
           type="password"
           placeholder="Confirmar senha"
@@ -104,7 +102,6 @@ export default function ResetPasswordPage() {
           required
           className="w-full px-3 py-2 border rounded-md"
         />
-        
         <button
           type="submit"
           disabled={loading}
@@ -114,5 +111,13 @@ export default function ResetPasswordPage() {
         </button>
       </form>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Carregando…</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

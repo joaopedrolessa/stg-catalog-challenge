@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/services/supabaseClient';
+import { useSearchParams } from 'next/navigation';
 
 interface Product {
   id: string;
@@ -14,7 +15,8 @@ interface Product {
   name?: string; // caso tenha campo nome
 }
 
-export default function PesquisaPage() {
+function SearchContent() {
+  const params = useSearchParams();
   const [search, setSearch] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -47,6 +49,32 @@ export default function PesquisaPage() {
     }
     setLoading(false);
   };
+
+  // Prefill from query param and auto-search
+  useEffect(() => {
+    const q = params.get('q') || '';
+    if (q) {
+      setSearch(q);
+      // fire and forget; synthesize a submit
+      (async () => {
+        setLoading(true);
+        setError(null);
+        let query = supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false });
+        query = query.or(`category.ilike.%${q}%,name.ilike.%${q}%`);
+        const { data, error } = await query;
+        if (error) {
+          setError(error.message);
+          setProducts([]);
+        } else {
+          setProducts(data || []);
+        }
+        setLoading(false);
+      })();
+    }
+  }, [params]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -100,5 +128,13 @@ export default function PesquisaPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PesquisaPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Carregando…</div>}>
+      <SearchContent />
+    </Suspense>
   );
 }

@@ -25,6 +25,9 @@ export default function CatalogPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Catálogo</h1>
+      </div>
       <ProductGrid onProductClick={handleProductClick} />
       
       {/* Modal de Detalhes do Produto */}

@@ -25,11 +25,7 @@ export default function ProtectedRoute({
       
       if (requireAuth && !user) {
         router.push(redirectTo);
-      } else if (!requireAuth && user) {
-        // Se não requer autenticação mas o usuário está logado
-        // pode redirecionar para dashboard, por exemplo
-        router.push('/dashboard');
-      }
+  }
     }
   }, [user, router, requireAuth, redirectTo]);
 

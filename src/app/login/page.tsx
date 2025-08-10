@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import ProtectedRoute from '../../components/ProtectedRoute';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -10,6 +11,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const { signIn } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,11 +19,20 @@ export default function LoginPage() {
     setError('');
 
     const { error } = await signIn(email, password);
-    
+
     if (error) {
       setError(error.message);
+      setIsLoading(false);
+      return;
     }
-    
+
+    // Login OK -> tenta voltar para a rota anterior; se não houver, vai para a home
+    const canGoBack = typeof window !== 'undefined' && window.history.length > 1;
+    if (canGoBack) {
+      router.back();
+    } else {
+      router.push('/');
+    }
     setIsLoading(false);
   };
 
