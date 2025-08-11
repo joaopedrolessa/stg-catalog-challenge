@@ -26,7 +26,7 @@ export default function Home() {
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-10 h-30 flex items-center justify-center">
             Nossos Produtos
           </h2>
-          <ProductGrid />
+          <ProductGrid hideFilters />
         </div>
       </div>
     </div>

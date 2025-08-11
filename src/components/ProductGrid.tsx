@@ -1,10 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import ProductCard from './ProductCard';
 import { Product } from '../types/product';
 
+interface ProductGridProps {
+  hideFilters?: boolean;
+}
 
-export default function ProductGrid() {
+export default function ProductGrid({ hideFilters = false }: ProductGridProps) {
   const { products, loading, error, refetch } = useProducts();
   // 🔍 ADICIONE ESTES LOGS PARA DEBUG:
   console.log('🎯 Estado do ProductGrid:', {
@@ -16,38 +19,66 @@ export default function ProductGrid() {
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
-  const categories = ['all', ...new Set(products.map(product => product.category))];
+  const [minValue, setMinValue] = useState<string>('');
+  const [maxValue, setMaxValue] = useState<string>('');
+  // Normaliza categorias para unicidade real, mas mantém o nome original para exibição
+  const categories = Array.from(new Set(products.map(product => product.category))).filter(Boolean);
+
+  // Chunk logic for home page
+  function chunkArray<T>(arr: T[], size: number): T[][] {
+    const result = [];
+    for (let i = 0; i < arr.length; i += size) {
+      result.push(arr.slice(i, i + size));
+    }
+    return result;
+  }
+
+  // Filter and sort products before chunking
   const filteredAndSortedProducts = products
-    .filter(product => selectedCategory === 'all' || product.category === selectedCategory)
+    .filter(product =>
+      (selectedCategory === 'all' || product.category === selectedCategory)
+    )
+    .filter(product =>
+      (minValue === '' || product.price >= parseFloat(minValue)) &&
+      (maxValue === '' || product.price <= parseFloat(maxValue))
+    )
     .sort((a, b) => {
       switch (sortBy) {
         case 'price-low':
           return a.price - b.price;
         case 'price-high':
           return b.price - a.price;
-        case 'quantity':
-          return b.quantity - a.quantity;
+        case 'name-az': {
+          const nameA = a.name || '';
+          const nameB = b.name || '';
+          return nameA.localeCompare(nameB);
+        }
+        case 'name-za': {
+          const nameA = a.name || '';
+          const nameB = b.name || '';
+          return nameB.localeCompare(nameA);
+        }
         case 'newest':
         default:
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
-  // --- ANIMAÇÃO DE BLOCOS DE 4 ---
-  // Divide os produtos em blocos de 4
-  const chunkArray = (arr: Product[], size: number) => {
-    const result = [];
-    for (let i = 0; i < arr.length; i += size) {
-      result.push(arr.slice(i, i + size));
-    }
-    return result;
-  };
-  const productChunks = chunkArray(filteredAndSortedProducts, 4);
+
+
+  // Only chunk for main page (hideFilters), memoized
+  const productChunks = useMemo(() => (
+    hideFilters
+      ? chunkArray(filteredAndSortedProducts, 8)
+      : [filteredAndSortedProducts]
+  ), [hideFilters, filteredAndSortedProducts]);
+
   const blockRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [visibleBlocks, setVisibleBlocks] = useState<number[]>([]);
   useEffect(() => {
+    if (!hideFilters) return;
     const observers: IntersectionObserver[] = [];
     blockRefs.current = blockRefs.current.slice(0, productChunks.length);
-    productChunks.forEach((_, idx) => {
+    productChunks.forEach((_: Product[], idx: number) => {
       const ref = blockRefs.current[idx];
       if (!ref) return;
       const observer = new window.IntersectionObserver(
@@ -69,7 +100,7 @@ export default function ProductGrid() {
     return () => {
       observers.forEach((obs) => obs.disconnect());
     };
-  }, [productChunks]);
+  }, [hideFilters, productChunks]);
 
   if (loading) {
     return (
@@ -110,41 +141,117 @@ export default function ProductGrid() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Grid de Produtos animado por blocos de 4 */}
-      {filteredAndSortedProducts.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="bg-gray-50 border border-gray-200 text-gray-700 px-4 py-8 rounded-lg">
-            <h3 className="text-lg font-medium">Nenhum produto encontrado</h3>
-            <p className="text-sm mt-1">
-              Nenhum produto disponível no momento.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="pt-8 mt-10">
-          {productChunks.map((chunk, idx) => (
-            <div
-              key={idx}
-              className={`bg-white rounded-xl shadow-md p-6 mb-8 transition-all duration-700 ease-out w-full min-h-[340px]
-                ${visibleBlocks.includes(idx)
-                  ? 'opacity-100 translate-y-0'
-                  : 'opacity-0 translate-y-8 pointer-events-none'}
-              `}
-              ref={el => { blockRefs.current[idx] = el; }}
-            >
-                     <div className="grid grid-cols-4 gap-6 w-full h-full">
-                {chunk.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                  />
+  <div className="container mx-auto px-4 py-8 flex flex-col items-center">
+      {/* Filtros e ordenação */}
+      {!hideFilters && (
+        <div className="w-full flex flex-row gap-8 items-start">
+          {/* Sidebar de filtros */}
+          <aside className="w-full max-w-xs bg-white p-6 rounded-lg shadow mb-8 sticky top-28 self-start">
+            {/* Ordenação em primeiro */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
+              <select
+                className="border rounded px-3 py-2 w-full"
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value)}
+              >
+                <option value="newest">Mais recentes</option>
+                <option value="name-az">Nome (A-Z)</option>
+                <option value="name-za">Nome (Z-A)</option>
+                <option value="price-low">Valor crescente</option>
+                <option value="price-high">Valor decrescente</option>
+              </select>
+            </div>
+            {/* Categoria como select */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+              <select
+                className="border rounded px-3 py-2 w-full"
+                value={selectedCategory}
+                onChange={e => setSelectedCategory(e.target.value)}
+              >
+                <option value="all">Todas</option>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+            {/* Valores */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Valor mínimo</label>
+              <input
+                type="number"
+                className="border rounded px-3 py-2 w-full"
+                value={minValue}
+                onChange={e => setMinValue(e.target.value)}
+                placeholder="R$ Min"
+                min={0}
+              />
+            </div>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Valor máximo</label>
+              <input
+                type="number"
+                className="border rounded px-3 py-2 w-full"
+                value={maxValue}
+                onChange={e => setMaxValue(e.target.value)}
+                placeholder="R$ Max"
+                min={0}
+              />
+            </div>
+          </aside>
+          {/* Grid de produtos */}
+          <div className="flex-1">
+            {filteredAndSortedProducts.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="bg-gray-50 border border-gray-200 text-gray-700 px-4 py-8 rounded-lg">
+                  <h3 className="text-lg font-medium">Nenhum produto encontrado</h3>
+                  <p className="text-sm mt-1">
+                    Nenhum produto disponível no momento.
+                  </p>
+                </div>
+              </div>
+            ) : hideFilters ? (
+              <div className="pt-8 mt-10">
+                {productChunks.map((chunk, idx) => (
+                  <div
+                    key={idx}
+                    className={`bg-white rounded-xl shadow-md p-6 mb-8 transition-all duration-700 ease-out w-full min-h-[340px] max-w-6xl mx-auto
+                      ${visibleBlocks.includes(idx)
+                        ? 'opacity-100 translate-y-0'
+                        : 'opacity-0 translate-y-8 pointer-events-none'}
+                    `}
+                    ref={el => { blockRefs.current[idx] = el; }}
+                  >
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full h-full">
+                      {chunk.map((product) => (
+                        <ProductCard
+                          key={product.id}
+                          product={product}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
-            </div>
-          ))}
+            ) : (
+              <div className="pt-8 mt-10 flex flex-col items-center w-full">
+                <div className="bg-white rounded-xl shadow-md p-6 mb-8 transition-all duration-700 ease-out max-w-6xl w-full mx-auto min-h-[340px] opacity-100 translate-y-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full h-full justify-items-center mx-auto">
+                    {filteredAndSortedProducts.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
+  {/* (Bloco duplicado removido) */}
     </div>
   );
 }

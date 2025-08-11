@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "../contexts/AuthContext";
 import Navbar from "../components/Navbar";
@@ -30,6 +32,7 @@ export default function RootLayout({
         <AuthProvider>
           <Navbar />
           {children}
+          <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover theme="colored" />
         </AuthProvider>
       </body>
     </html>

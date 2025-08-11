@@ -39,29 +39,17 @@ export default function RegisterPage() {
 
   return (
     <ProtectedRoute requireAuth={false}>
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Criar uma nova conta
-            </h2>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex w-full max-w-5xl bg-white rounded-xl shadow-lg overflow-hidden h-150">
+          {/* Esquerda: Título */}
+          <div className="hidden md:flex flex-col justify-center items-start flex-1 p-12 bg-white">
+            <h2 className="text-4xl font-bold mb-4 text-gray-900">Crie sua conta<br />para acessar o catálogo</h2>
           </div>
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                {error}
-              </div>
-            )}
-            {success && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                {success}
-              </div>
-            )}
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="email" className="sr-only">
-                  Email
-                </label>
+          {/* Direita: Card de registro */}
+          <div className="flex-1 flex flex-col items-center justify-center p-8">
+            <div className="w-full max-w-md flex flex-col items-center justify-center">
+              <form className="bg-white flex flex-col items-center justify-center w-full" onSubmit={handleSubmit}>
+                <label className="block mb-2 text-gray-700 font-semibold self-center">E-mail</label>
                 <input
                   id="email"
                   name="email"
@@ -69,14 +57,12 @@ export default function RegisterPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Endereço de email"
+                  className="mb-4 px-4 py-5 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  style={{ width: '100%' }}
+                  placeholder="E-mail"
+                  autoFocus
                 />
-              </div>
-              <div>
-                <label htmlFor="password" className="sr-only">
-                  Senha
-                </label>
+                <label className="block mb-2 text-gray-700 font-semibold self-center">Senha</label>
                 <input
                   id="password"
                   name="password"
@@ -84,14 +70,11 @@ export default function RegisterPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="mb-4 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  style={{ width: '100%' }}
                   placeholder="Senha"
                 />
-              </div>
-              <div>
-                <label htmlFor="confirmPassword" className="sr-only">
-                  Confirmar Senha
-                </label>
+                <label className="block mb-2 text-gray-700 font-semibold self-center">Confirmar senha</label>
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
@@ -99,31 +82,31 @@ export default function RegisterPage() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="mb-4 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  style={{ width: '100%' }}
                   placeholder="Confirmar senha"
                 />
+                {error && <div className="text-red-600 mb-4 text-center">{error}</div>}
+                {success && <div className="text-green-600 mb-4 text-center">{success}</div>}
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700 transition mb-2"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Criando conta...' : 'Criar conta'}
+                </button>
+              </form>
+              <div className="text-center my-2">
+                <a
+                  href="/login"
+                  className=" font-semibold hover:underline !opacity-100 text-gray-700"
+                  style={{ opacity: 1, color: '#2563eb' }}
+                >
+                  Já tem uma conta? Faça login
+                </a>
               </div>
             </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-              >
-                {isLoading ? 'Criando conta...' : 'Criar conta'}
-              </button>
-            </div>
-
-            <div className="text-center">
-              <Link 
-                href="/login" 
-                className="font-medium text-indigo-600 hover:text-indigo-500"
-              >
-                Já tem uma conta? Faça login
-              </Link>
-            </div>
-          </form>
+          </div>
         </div>
       </div>
     </ProtectedRoute>
