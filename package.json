@@ -5,8 +5,9 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+  "start": "next start",
+  "lint": "next lint",
+  "populate:images": "tsx scripts/populateUnsplash.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.53.0",
@@ -24,6 +25,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
-    "typescript": "^5"
+    "typescript": "^5",
+    "dotenv": "^16.4.5",
+    "tsx": "^4.7.0"
   }
 }

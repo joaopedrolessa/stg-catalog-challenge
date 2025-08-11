@@ -38,22 +38,23 @@ export default function Navbar() {
 
   return (
     <nav
-      className="w-full h-16 bg-[#42789C] rounded-lg shadow mx-3 sm:mx-4 md:mx-6 lg:mx-8"
+      className="w-full h-16 bg-[#42789C] shadow"
       style={{
         boxShadow: "0px 0px 1px #171a1fDD, 0px 0px 2px #171a1f14",
       }}
     >
-  <div className="w-full max-w-screen-2xl mx-auto flex items-center h-16 gap-2 sm:gap-3 md:gap-4 px-3 sm:px-4 md:px-9 xl:px-14">
+  <div className="w-full flex flex-row items-center justify-between h-16 gap-2 sm:gap-3 md:gap-4 px-4 md:px-8 xl:px-14 min-h-0">
         {/* Marca/Site Name (esquerda) */}
         <Link
           href="/"
           aria-label="Ir para a página inicial"
-          className="shrink-0 text-white font-bold tracking-tight text-lg md:text-xl whitespace-nowrap hover:opacity-90 transition-opacity"
+          className="flex items-center h-12 min-h-0 flex-shrink-0 text-white font-bold tracking-tight text-lg md:text-xl whitespace-nowrap hover:opacity-90 transition-opacity"
+          style={{ lineHeight: '1.2' }}
         >
           STG Catalog
         </Link>
 
-    <div className="flex-1 flex items-center justify-center">
+  <div className="flex-1 flex items-center justify-center min-h-0 h-12">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -61,9 +62,9 @@ export default function Navbar() {
               if (!q) return;
               router.push(`/search?q=${encodeURIComponent(q)}`);
             }}
-      className="w-full max-w-md sm:max-w-lg lg:max-w-xl mx-3 sm:mx-6"
+  className="w-full max-w-md sm:max-w-lg lg:max-w-xl mx-3 sm:mx-6 min-h-0"
           >
-            <div className="flex items-center h-10 w-full rounded-full border border-white/60 bg-transparent focus-within:border-white focus-within:ring-2 focus-within:ring-white/70 transition px-3">
+            <div className="flex items-center h-10 w-full rounded-full border border-white/60 bg-transparent focus-within:border-white focus-within:ring-2 focus-within:ring-white/70 transition px-3 min-h-0">
               <span className="pl-8 md:pl-10 pr-3 text-white/80 flex items-center pointer-events-none">
                 <svg
                   width="16"
@@ -91,7 +92,7 @@ export default function Navbar() {
         </div>
 
         {/* Botões Carrinho e Conta */}
-    <div className="flex items-center gap-2 sm:gap-3 md:gap-4 pl-2 sm:pl-4">
+  <div className="flex items-center gap-2 sm:gap-3 md:gap-4 pl-2 sm:pl-4 h-12 min-h-0 flex-shrink-0">
           <Link
             href="/catalog"
       aria-label="Abrir catálogo"
