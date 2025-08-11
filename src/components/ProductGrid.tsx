@@ -1,15 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import ProductCard from './ProductCard';
 import { Product } from '../types/product';
 
-interface ProductGridProps {
-  onProductClick?: (product: Product) => void;
-}
 
-export default function ProductGrid({ onProductClick }: ProductGridProps) {
+export default function ProductGrid() {
   const { products, loading, error, refetch } = useProducts();
-  
   // 🔍 ADICIONE ESTES LOGS PARA DEBUG:
   console.log('🎯 Estado do ProductGrid:', {
     products,
@@ -20,11 +16,7 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
-
-  // Obter categorias únicas
   const categories = ['all', ...new Set(products.map(product => product.category))];
-
-  // Filtrar e ordenar produtos
   const filteredAndSortedProducts = products
     .filter(product => selectedCategory === 'all' || product.category === selectedCategory)
     .sort((a, b) => {
@@ -40,6 +32,44 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
+  // --- ANIMAÇÃO DE BLOCOS DE 4 ---
+  // Divide os produtos em blocos de 4
+  const chunkArray = (arr: Product[], size: number) => {
+    const result = [];
+    for (let i = 0; i < arr.length; i += size) {
+      result.push(arr.slice(i, i + size));
+    }
+    return result;
+  };
+  const productChunks = chunkArray(filteredAndSortedProducts, 4);
+  const blockRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [visibleBlocks, setVisibleBlocks] = useState<number[]>([]);
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    blockRefs.current = blockRefs.current.slice(0, productChunks.length);
+    productChunks.forEach((_, idx) => {
+      const ref = blockRefs.current[idx];
+      if (!ref) return;
+      const observer = new window.IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setVisibleBlocks((prev) =>
+                prev.includes(idx) ? prev : [...prev, idx]
+              );
+              observer.disconnect();
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      observer.observe(ref);
+      observers.push(observer);
+    });
+    return () => {
+      observers.forEach((obs) => obs.disconnect());
+    };
+  }, [productChunks]);
 
   if (loading) {
     return (
@@ -81,77 +111,37 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Catálogo de Produtos</h1>
-        <p className="text-gray-600">Encontre os melhores produtos com os melhores preços</p>
-      </div>
-
-      {/* Filtros e Ordenação */}
-      <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          {/* Filtro por Categoria */}
-          <div className="flex flex-wrap gap-2">
-            <span className="text-sm font-medium text-gray-700 mr-2">Categoria:</span>
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                  selectedCategory === category
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {category === 'all' ? 'Todas' : category}
-              </button>
-            ))}
-          </div>
-
-          {/* Ordenação */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Ordenar:</span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="newest">Mais Recentes</option>
-              <option value="price-low">Menor Preço</option>
-              <option value="price-high">Maior Preço</option>
-              <option value="quantity">Maior Estoque</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Contador de Resultados */}
-        <div className="text-sm text-gray-500 mt-3">
-          {filteredAndSortedProducts.length} produto{filteredAndSortedProducts.length !== 1 ? 's' : ''} 
-          {selectedCategory !== 'all' && ` na categoria "${selectedCategory}"`}
-        </div>
-      </div>
-
-      {/* Grid de Produtos */}
+      {/* Grid de Produtos animado por blocos de 4 */}
       {filteredAndSortedProducts.length === 0 ? (
         <div className="text-center py-12">
           <div className="bg-gray-50 border border-gray-200 text-gray-700 px-4 py-8 rounded-lg">
             <h3 className="text-lg font-medium">Nenhum produto encontrado</h3>
             <p className="text-sm mt-1">
-              {selectedCategory === 'all' 
-                ? 'Adicione produtos ao catálogo para vê-los aqui.' 
-                : `Não há produtos na categoria "${selectedCategory}".`
-              }
+              Nenhum produto disponível no momento.
             </p>
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredAndSortedProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onProductClick={onProductClick}
-            />
+        <div className="pt-8 mt-10">
+          {productChunks.map((chunk, idx) => (
+            <div
+              key={idx}
+              className={`bg-white rounded-xl shadow-md p-6 mb-8 transition-all duration-700 ease-out w-full min-h-[340px]
+                ${visibleBlocks.includes(idx)
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-8 pointer-events-none'}
+              `}
+              ref={el => { blockRefs.current[idx] = el; }}
+            >
+                     <div className="grid grid-cols-4 gap-6 w-full h-full">
+                {chunk.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}
