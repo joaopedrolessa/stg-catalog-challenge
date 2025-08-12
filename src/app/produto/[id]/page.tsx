@@ -45,9 +45,19 @@ export default function ProdutoPage() {
     setAdding(true);
     try {
       await addToCart(user.id, product!.id, 1);
-      alert('Produto adicionado ao carrinho!');
+      toast.success('Produto adicionado ao carrinho!', {
+        position: 'top-center',
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'colored',
+        style: { background: '#22c55e', color: '#fff', fontWeight: 'bold' },
+      });
     } catch (e) {
-      alert('Erro ao adicionar ao carrinho.');
+      toast.error('Erro ao adicionar ao carrinho.');
     } finally {
       setAdding(false);
     }

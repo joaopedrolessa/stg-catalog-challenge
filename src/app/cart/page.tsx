@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { toast } from 'react-toastify';
 // Função para montar mensagem do pedido
 
 import type { User } from '@supabase/supabase-js';
@@ -57,6 +58,24 @@ export default function CartPage() {
     const [loadingCart, setLoadingCart] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [updating, setUpdating] = useState<string | null>(null);
+
+    // Sincroniza o estado do carrinho com o localStorage (para limpeza automática)
+    useEffect(() => {
+        function syncCartFromStorage() {
+            const cartLS = localStorage.getItem('cart');
+            if (cartLS) {
+                try {
+                    setCart(JSON.parse(cartLS));
+                } catch {
+                    setCart([]);
+                }
+            } else {
+                setCart([]);
+            }
+        }
+        window.addEventListener('storage', syncCartFromStorage);
+        return () => window.removeEventListener('storage', syncCartFromStorage);
+    }, []);
 
     // Estados para simulação de frete
     const [cep, setCep] = useState('');
@@ -135,134 +154,164 @@ export default function CartPage() {
         return <div className="text-center text-red-600 mt-10">{error}</div>;
     }
 
-    const subtotal = cart.reduce((sum, item) => sum + (item.product?.price || 0) * item.quantity, 0);
+        const subtotal = cart.reduce((sum, item) => sum + (item.product?.price || 0) * item.quantity, 0);
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 py-10">
-            <div className="container mx-auto px-4 max-w-3xl">
-                <h1 className="text-3xl font-bold mb-8 text-center text-gray-900">Meu Carrinho</h1>
-                {cart.length === 0 ? (
-                    <div className="text-center text-gray-700">Seu carrinho está vazio.</div>
-                ) : (
-                    <div className="space-y-6">
-                        {cart.map((item) => (
-                            <div
-                                key={item.id}
-                                className="flex items-center bg-white rounded-lg shadow p-4 gap-4 border border-gray-300"
-                            >
-                                <img
-                                    src={item.product?.image_url}
-                                    alt={item.product?.name}
-                                    className="w-20 h-20 object-cover rounded border border-gray-200"
-                                />
-                                <div className="flex-1">
-                                    <div className="font-semibold text-lg text-gray-900">
-                                        {item.product?.name || "Produto"}
-                                    </div>
-                                    <div className="text-gray-700">{item.product?.description}</div>
-                                    <div className="mt-2 flex gap-4 items-center">
-                                        <span className="text-sm flex items-center gap-2 text-gray-800">
-                                            Qtd:
-                                            <input
-                                                type="number"
-                                                min={1}
-                                                value={item.quantity}
-                                                disabled={updating === item.id}
-                                                onChange={e => handleUpdateQuantity(item.id, Number(e.target.value))}
-                                                className="w-16 border border-gray-400 rounded px-2 py-1 bg-gray-50 text-gray-900"
-                                            />
-                                        </span>
-                                        <span className="text-sm text-gray-800">
-                                            Preço: <b className="text-green-700">R$ {item.product?.price?.toFixed(2)}</b>
-                                        </span>
-                                        <span className="text-sm font-semibold text-gray-900">
-                                            Subtotal: <span className="text-green-700">R$ {(item.product?.price * item.quantity).toFixed(2)}</span>
-                                        </span>
+        // Agrupamento simulado por loja (usando product.category como loja fictícia)
+        const grouped = cart.reduce((acc: Record<string, CartItem[]>, item) => {
+            const loja = item.product?.category || 'Loja Única';
+            if (!acc[loja]) acc[loja] = [];
+            acc[loja].push(item);
+            return acc;
+        }, {});
+
+                // Função para finalizar pedido com verificação do frete
+                const handleFinalizarPedido = () => {
+                            if (frete === null) {
+                                toast.warn('Por favor, adicione o CEP antes de continuar.', {
+                            position: 'top-center',
+                            autoClose: 3000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: 'colored',
+                        });
+                        return;
+                    }
+                    const mensagem = montarMensagemPedido(user, cart, subtotal + (frete || 0));
+                    abrirWhatsapp(mensagem);
+                    setShowConfirm(true);
+                };
+
+                return (
+                    <div className="min-h-screen bg-[#f2f2f2] py-8 flex items-start justify-center" style={{ alignItems: 'flex-start', paddingTop: '12vh' }}>
+                    <div className="w-full max-w-7xl px-4 flex flex-col lg:flex-row gap-8 items-center justify-center">
+                    {/* Coluna esquerda: Produtos */}
+                      <div className="flex-1 max-w-3xl w-full">
+                        {Object.entries(grouped).map(([loja, items]) => (
+                                            <div key={loja} className="bg-white rounded-xl shadow mb-6">
+                                                <div className="border-b px-6 py-4 flex items-center gap-2">
+                                                    <input type="checkbox" disabled className="accent-blue-500" />
+                                                    <span className="font-semibold text-lg text-gray-800">Produtos de {loja}</span>
+                                                </div>
+                                                {items.map(item => (
+                                                                                              <div key={item.id} className="flex items-center px-12 py-8 border-b last:border-b-0 text-[120%]">
+                                                                                                <input type="checkbox" disabled className="accent-blue-500 mr-8 scale-150" />
+                                                                                                <img src={item.product?.image_url} alt={item.product?.name} className="w-28 h-28 object-cover rounded border mr-8" />
+                                                                                                                    <div className="flex-1">
+                                                                                                                        <div className="font-bold text-xl mb-2 truncate max-w-xs text-gray-900">{item.product?.name}</div>
+                                                                                                                        <button onClick={() => handleRemove(item.id)} className="text-blue-600 text-base hover:underline">Excluir</button>
+                                                                                                                    </div>
+                                                                                                {/* Controle de quantidade estilizado */}
+                                                                                                                    <div className="flex items-center border rounded px-4 py-3 mr-12">
+                                                                                                                        <button onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} disabled={item.quantity <= 1 || updating === item.id} className="text-gray-700 px-4 text-xl font-bold disabled:opacity-40">-</button>
+                                                                                                                        <span className="mx-4 w-12 text-center select-none text-gray-900 text-xl">{item.quantity}</span>
+                                                                                                                        <button onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)} disabled={updating === item.id} className="text-blue-600 px-4 text-xl font-bold disabled:opacity-40">+</button>
+                                                                                                                    </div>
+                                                                                                                    <div className="text-right font-semibold text-xl min-w-[225px] text-gray-900 flex items-center justify-end" style={{height: '96px'}}>R$ {item.product?.price?.toFixed(2)}</div>
+                                                                                            </div>
+                                                ))}
+                                            </div>
+                        ))}
+                    </div>
+                    {/* Coluna direita: Resumo */}
+                                <div className="w-full lg:w-[340px]">
+                                    <div className="bg-white rounded-xl shadow p-6 sticky top-8">
+                                        <h2 className="font-semibold text-lg mb-4 text-gray-800">Resumo da compra</h2>
+                                        <div className="flex justify-between mb-2">
+                                            <span className="text-gray-800">Total</span>
+                                            <span className="font-bold text-lg text-gray-900">R$ {subtotal.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex flex-col gap-2 mb-4">
+                                            <label htmlFor="frete" className="text-sm text-gray-800">Calcule o frete</label>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    id="frete"
+                                                    type="text"
+                                                    placeholder="Digite seu CEP"
+                                                    className="border rounded px-3 py-2 w-32 focus:outline-none focus:ring-2 focus:ring-blue-200 text-gray-900"
+                                                    maxLength={8}
+                                                    value={cep}
+                                                    onChange={e => setCep(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                                                />
+                                                <button
+                                                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                                                    type="button"
+                                                    onClick={() => calcularFrete(cep)}
+                                                >
+                                                    Calcular
+                                                </button>
+                                            </div>
+                                            {freteError && <span className="text-red-600 text-sm ml-2">{freteError}</span>}
+                                            {frete !== null && !freteError && (
+                                                <div className="text-green-700 font-semibold mt-2">Frete: R$ {frete.toFixed(2)}</div>
+                                            )}
+                                        </div>
+                                        <div className="flex justify-between text-lg font-bold mt-4">
+                                            <span className="text-gray-800">Total</span>
+                                            <span className="text-green-700">R$ {(subtotal + (frete || 0)).toFixed(2)}</span>
+                                        </div>
+                                                                        <button
+                                                                            className="w-full mt-6 bg-blue-600 text-white py-3 rounded font-semibold hover:bg-blue-700 transition"
+                                                                            onClick={() => {
+                                                                                if (frete === null) {
+                                                                                    toast.warn('Por favor, adicione o CEP antes de continuar.', {
+                                                                                        position: 'top-center',
+                                                                                        autoClose: 3000,
+                                                                                        hideProgressBar: false,
+                                                                                        closeOnClick: true,
+                                                                                        pauseOnHover: true,
+                                                                                        draggable: true,
+                                                                                        progress: undefined,
+                                                                                        theme: 'colored',
+                                                                                    });
+                                                                                    return;
+                                                                                }
+                                                                                  // Salva dados do carrinho e frete no localStorage
+                                                                                  localStorage.setItem('checkout_cart', JSON.stringify(cart));
+                                                                                  localStorage.setItem('checkout_frete', String(frete));
+                                                                                  window.location.href = '/checkout';
+                                                                            }}
+                                                                        >
+                                                                            Continuar a compra
+                                                                        </button>
                                     </div>
                                 </div>
+                    {/* Modal de confirmação (inalterado) */}
+                    {showConfirm && (
+                        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                            <div className="bg-white p-8 rounded shadow-lg text-center">
+                                <p className="mb-4 text-lg">Pedido enviado pelo WhatsApp?</p>
                                 <button
-                                    onClick={() => handleRemove(item.id)}
-                                    className="ml-4 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                                    className="bg-blue-600 text-white px-4 py-2 rounded mr-4"
+                                    onClick={async () => {
+                                        for (const item of cart) {
+                                            await supabase
+                                                .from("products")
+                                                .update({ quantity: (item.product.quantity || 0) - item.quantity })
+                                                .eq("id", item.product_id);
+                                        }
+                                        await supabase.from("cart_items").delete().eq("user_id", user.id);
+                                        setCart([]);
+                                        setShowConfirm(false);
+                                    }}
                                 >
-                                    Remover
+                                    Confirmar e limpar carrinho
+                                </button>
+                                <button
+                                    className="bg-gray-300 px-4 py-2 rounded"
+                                    onClick={() => setShowConfirm(false)}
+                                >
+                                    Cancelar
                                 </button>
                             </div>
-                        ))}
-                        {/* Simulador de frete */}
-                        <div className="mb-6 flex items-center gap-2 justify-end">
-                            <input
-                                type="text"
-                                placeholder="Digite seu CEP"
-                                value={cep}
-                                onChange={e => setCep(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                                className="border border-gray-400 rounded px-2 py-1 w-40"
-                            />
-                            <button
-                                onClick={() => calcularFrete(cep)}
-                                className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-                                type="button"
-                            >
-                                Calcular Frete
-                            </button>
-                            {freteError && <span className="text-red-600 text-sm ml-2">{freteError}</span>}
                         </div>
-                        {frete !== null && (
-                            <div className="text-right text-green-700 font-semibold mb-2">
-                                Frete: R$ {frete.toFixed(2)}
-                            </div>
-                        )}
-                        <div className="text-right text-xl font-bold mt-6 text-gray-900">
-                            Total: <span className="text-green-700">R$ {(subtotal + (frete || 0)).toFixed(2)}</span>
-                        </div>
-                        {/* Botão finalizar pedido */}
-                        <div className="mt-8 text-center">
-                          <button
-                            className="bg-green-600 text-white px-6 py-3 rounded font-bold hover:bg-green-700 transition"
-                            onClick={() => {
-                              const mensagem = montarMensagemPedido(user, cart, subtotal + (frete || 0));
-                              abrirWhatsapp(mensagem);
-                              setShowConfirm(true);
-                            }}
-                          >
-                            Finalizar pedido no WhatsApp
-                          </button>
-                        </div>
-                        {/* Modal de confirmação */}
-                        {showConfirm && (
-                          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-                            <div className="bg-white p-8 rounded shadow-lg text-center">
-                              <p className="mb-4 text-lg">Pedido enviado pelo WhatsApp?</p>
-                              <button
-                                className="bg-blue-600 text-white px-4 py-2 rounded mr-4"
-                                onClick={async () => {
-                                  for (const item of cart) {
-                                    await supabase
-                                      .from("products")
-                                      .update({ quantity: (item.product.quantity || 0) - item.quantity })
-                                      .eq("id", item.product_id);
-                                  }
-                                  await supabase.from("cart_items").delete().eq("user_id", user.id);
-                                  setCart([]);
-                                  setShowConfirm(false);
-                                }}
-                              >
-                                Confirmar e limpar carrinho
-                              </button>
-                              <button
-                                className="bg-gray-300 px-4 py-2 rounded"
-                                onClick={() => setShowConfirm(false)}
-                              >
-                                Cancelar
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                    </div>
-                )}
+                    )}
+                </div>
                 <div className="mt-10 text-center">
                     <Link href="/catalog" className="text-blue-700 hover:underline font-semibold">Continuar comprando</Link>
                 </div>
             </div>
-        </div>
-    );
+        );
 }
