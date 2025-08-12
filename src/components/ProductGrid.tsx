@@ -141,17 +141,17 @@ export default function ProductGrid({ hideFilters = false }: ProductGridProps) {
   }
 
   return (
-  <div className="container mx-auto px-4 py-8 flex flex-col items-center">
+  <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 flex flex-col items-center">
       {/* Filtros e ordenação */}
       {!hideFilters && (
-        <div className="w-full flex flex-row gap-8 items-start">
+  <div className="w-full flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
           {/* Sidebar de filtros */}
-          <aside className="w-full max-w-xs bg-white p-6 rounded-lg shadow mb-8 sticky top-28 self-start">
+          <aside className="w-full sm:w-64 bg-white p-4 sm:p-6 rounded-lg shadow mb-4 sm:mb-8 sticky top-20 sm:top-24 self-start flex-shrink-0">
             {/* Ordenação em primeiro */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
               <select
-                className="border rounded px-3 py-2 w-full"
+                className="border rounded px-3 py-2 w-full text-gray-700 placeholder-gray-700"
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value)}
               >
@@ -166,7 +166,7 @@ export default function ProductGrid({ hideFilters = false }: ProductGridProps) {
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
               <select
-                className="border rounded px-3 py-2 w-full"
+                className="border rounded px-3 py-2 w-full text-gray-700 placeholder-gray-700"
                 value={selectedCategory}
                 onChange={e => setSelectedCategory(e.target.value)}
               >
@@ -181,7 +181,7 @@ export default function ProductGrid({ hideFilters = false }: ProductGridProps) {
               <label className="block text-sm font-medium text-gray-700 mb-1">Valor mínimo</label>
               <input
                 type="number"
-                className="border rounded px-3 py-2 w-full"
+                className="border rounded px-3 py-2 w-full text-gray-700 placeholder-gray-700"
                 value={minValue}
                 onChange={e => setMinValue(e.target.value)}
                 placeholder="R$ Min"
@@ -192,7 +192,7 @@ export default function ProductGrid({ hideFilters = false }: ProductGridProps) {
               <label className="block text-sm font-medium text-gray-700 mb-1">Valor máximo</label>
               <input
                 type="number"
-                className="border rounded px-3 py-2 w-full"
+                className="border rounded px-3 py-2 w-full text-gray-700 placeholder-gray-700"
                 value={maxValue}
                 onChange={e => setMaxValue(e.target.value)}
                 placeholder="R$ Max"
@@ -201,7 +201,7 @@ export default function ProductGrid({ hideFilters = false }: ProductGridProps) {
             </div>
           </aside>
           {/* Grid de produtos */}
-          <div className="flex-1">
+          <div className="flex-1 w-full">
             {filteredAndSortedProducts.length === 0 ? (
               <div className="text-center py-12">
                 <div className="bg-gray-50 border border-gray-200 text-gray-700 px-4 py-8 rounded-lg">
@@ -235,9 +235,9 @@ export default function ProductGrid({ hideFilters = false }: ProductGridProps) {
                 ))}
               </div>
             ) : (
-              <div className="pt-8 mt-10 flex flex-col items-center w-full">
-                <div className="bg-white rounded-xl shadow-md p-6 mb-8 transition-all duration-700 ease-out max-w-6xl w-full mx-auto min-h-[340px] opacity-100 translate-y-0">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full h-full justify-items-center mx-auto">
+              <div className="pt-4 sm:pt-8 mt-4 sm:mt-10 flex flex-col items-center w-full">
+                <div className="bg-white rounded-xl shadow-md p-3 sm:p-5 mb-4 sm:mb-8 transition-all duration-700 ease-out max-w-full sm:max-w-6xl w-full mx-auto min-h-[340px] opacity-100 translate-y-0">
+                  <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 w-full h-full justify-items-stretch sm:justify-items-center mx-auto">
                     {filteredAndSortedProducts.map((product) => (
                       <ProductCard
                         key={product.id}

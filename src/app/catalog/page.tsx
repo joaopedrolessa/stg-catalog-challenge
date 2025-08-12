@@ -26,10 +26,11 @@ export default function CatalogPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 py-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Catálogo</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-[#171A1F]">Catálogo</h1>
       </div>
+
       <ProductGrid onProductClick={handleProductClick} />
-      
+
       {/* Modal de Detalhes do Produto */}
       {selectedProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -40,7 +41,7 @@ export default function CatalogPage() {
                 <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mb-2">
                   {selectedProduct.category}
                 </span>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-bold text-[#171A1F]">
                   {selectedProduct.category} - Produto #{selectedProduct.uuid?.slice(-6)}
                 </h2>
               </div>
@@ -69,7 +70,7 @@ export default function CatalogPage() {
                 <div className="space-y-4">
                   {/* Descrição */}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="text-lg font-semibold text-[#171A1F] mb-2">
                       Descrição
                     </h3>
                     <p className="text-gray-600 leading-relaxed">
@@ -79,7 +80,7 @@ export default function CatalogPage() {
 
                   {/* Preço */}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="text-lg font-semibold text-[#171A1F] mb-2">
                       Preço
                     </h3>
                     <p className="text-3xl font-bold text-green-600">
@@ -89,7 +90,7 @@ export default function CatalogPage() {
 
                   {/* Estoque */}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="text-lg font-semibold text-[#171A1F] mb-2">
                       Disponibilidade
                     </h3>
                     <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
@@ -108,7 +109,7 @@ export default function CatalogPage() {
 
                   {/* Data de Cadastro */}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="text-lg font-semibold text-[#171A1F] mb-2">
                       Cadastrado em
                     </h3>
                     <p className="text-gray-600">
