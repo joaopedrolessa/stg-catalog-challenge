@@ -57,7 +57,7 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mb-4 px-4 py-5 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="mb-4 px-4 py-5 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900 placeholder-gray-500"
                 style={{ width: '100%' }}
                 placeholder="E-mail"
                 autoFocus
@@ -70,7 +70,7 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mb-4 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="mb-4 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900 placeholder-gray-500"
                 style={{ width: '100%' }}
                 placeholder="Senha"
               />

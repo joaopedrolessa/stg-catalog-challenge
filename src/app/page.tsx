@@ -1,14 +1,18 @@
 "use client";
+
+
 import Image from 'next/image';
+import { toast } from 'react-toastify';
+import { addToCart } from '../utils/cart';
+import HeroCarousel from '../components/HeroCarousel';
+import ProductGrid from '../components/ProductGrid';
 
 
 import { useAuth } from '../hooks/useAuth';
 import { useProducts } from '../hooks/useProducts';
-import HeroCarousel from '../components/HeroCarousel';
-import ProductGrid from '../components/ProductGrid';
 
 export default function Home() {
-  const { loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { products, loading: productsLoading } = useProducts();
 
   if (authLoading || productsLoading) {
@@ -43,7 +47,27 @@ export default function Home() {
                     <p className="text-xs text-gray-700 truncate w-full">{product.description || "Descrição breve do produto."}</p>
                     <span className="text-xs text-gray-500 truncate w-full">Categoria: {product.category || "exemplo"}</span>
                     <div className="mt-4 flex flex-col gap-2 w-full">
-                      <button className="bg-blue-600 text-white text-xs px-3 py-2 rounded hover:bg-blue-700 transition w-full">Adicionar ao carrinho</button>
+                      <button
+                        className="bg-blue-600 text-white text-xs px-3 py-2 rounded hover:bg-blue-700 transition w-full"
+                        onClick={async () => {
+                          if (!user) {
+                            toast.error('Faça login para adicionar produtos ao carrinho!', { position: 'top-center', autoClose: 2500 });
+                            return;
+                          }
+                          try {
+                            await addToCart(user.id, product.id || product.uuid, 1);
+                            toast.success('Produto adicionado ao carrinho!', { position: 'top-right', autoClose: 2000 });
+                          } catch (err: unknown) {
+                            let msg = '';
+                            if (err && typeof err === 'object' && 'message' in err) {
+                              msg = (err as { message?: string }).message || '';
+                            }
+                            toast.error('Erro ao adicionar ao carrinho: ' + msg);
+                          }
+                        }}
+                      >
+                        Adicionar ao carrinho
+                      </button>
                     </div>
                   </div>
                 </div>
