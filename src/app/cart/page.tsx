@@ -1,5 +1,5 @@
-import Image from 'next/image';
 "use client";
+import Image from 'next/image';
 import { useEffect, useState } from "react";
 import { toast } from 'react-toastify';
 // Função para montar mensagem do pedido
