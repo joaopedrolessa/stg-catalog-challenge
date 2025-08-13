@@ -33,10 +33,10 @@ export default function CatalogPage() {
 
       {/* Modal de Detalhes do Produto */}
       {selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-lg w-full max-w-md sm:max-w-xl md:max-w-2xl max-h-[95vh] overflow-y-auto flex flex-col">
             {/* Header do Modal */}
-            <div className="flex justify-between items-start p-6 border-b">
+            <div className="flex justify-between items-start p-4 sm:p-6 border-b">
               <div>
                 <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mb-2">
                   {selectedProduct.category}
@@ -54,45 +54,37 @@ export default function CatalogPage() {
             </div>
 
             {/* Conteúdo do Modal */}
-            <div className="p-6">
-              <div className="grid md:grid-cols-2 gap-6">
+            <div className="p-4 sm:p-6">
+              <div className="flex flex-col md:grid md:grid-cols-2 gap-6 items-center justify-center">
                 {/* Imagem */}
-                <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden">
+                <div className="relative w-full h-56 sm:h-64 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
                   <Image
                     src={selectedProduct.image_url || '/placeholder-product.png'}
                     alt={`Produto ${selectedProduct.category}`}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                   />
                 </div>
 
                 {/* Informações */}
-                <div className="space-y-4">
+                <div className="space-y-4 w-full flex flex-col items-center md:items-start text-center md:text-left">
                   {/* Descrição */}
                   <div>
-                    <h3 className="text-lg font-semibold text-[#171A1F] mb-2">
-                      Descrição
-                    </h3>
-                    <p className="text-gray-600 leading-relaxed">
+                    <h3 className="text-lg font-semibold text-[#171A1F] mb-2">Descrição</h3>
+                    <p className="text-gray-600 leading-relaxed break-words">
                       Produto da categoria {selectedProduct.category}
                     </p>
                   </div>
 
                   {/* Preço */}
                   <div>
-                    <h3 className="text-lg font-semibold text-[#171A1F] mb-2">
-                      Preço
-                    </h3>
-                    <p className="text-3xl font-bold text-green-600">
-                      {formatPrice(selectedProduct.price)}
-                    </p>
+                    <h3 className="text-lg font-semibold text-[#171A1F] mb-2">Preço</h3>
+                    <p className="text-3xl font-bold text-green-600 break-words">{formatPrice(selectedProduct.price)}</p>
                   </div>
 
                   {/* Estoque */}
                   <div>
-                    <h3 className="text-lg font-semibold text-[#171A1F] mb-2">
-                      Disponibilidade
-                    </h3>
+                    <h3 className="text-lg font-semibold text-[#171A1F] mb-2">Disponibilidade</h3>
                     <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                       selectedProduct.quantity > 0
                         ? selectedProduct.quantity > 10
@@ -109,12 +101,8 @@ export default function CatalogPage() {
 
                   {/* Data de Cadastro */}
                   <div>
-                    <h3 className="text-lg font-semibold text-[#171A1F] mb-2">
-                      Cadastrado em
-                    </h3>
-                    <p className="text-gray-600">
-                      {formatDate(selectedProduct.created_at)}
-                    </p>
+                    <h3 className="text-lg font-semibold text-[#171A1F] mb-2">Cadastrado em</h3>
+                    <p className="text-gray-600">{formatDate(selectedProduct.created_at)}</p>
                   </div>
                 </div>
               </div>

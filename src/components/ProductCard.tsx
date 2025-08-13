@@ -2,6 +2,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Product } from '../types/product';
+import { toast } from 'react-toastify';
+import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../services/supabaseClient';
 
 interface ProductCardProps {
   product: Product;
@@ -10,6 +13,7 @@ interface ProductCardProps {
 
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const { user } = useAuth();
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -52,14 +56,56 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.category && (
             <span className="text-xs sm:text-sm text-gray-500 truncate w-full">Categoria: {product.category}</span>
           )}
-          {/* Área de frete e botões (exemplo) */}
-          <div className="mt-2 flex flex-col gap-2 sm:gap-2 flex-shrink-0 items-start w-full">
-            <span className="text-xs sm:text-sm text-gray-500 truncate w-full">Calcule o frete</span>
-            <input type="text" placeholder="Digite seu CEP" className="text-xs sm:text-sm px-2 py-1 border rounded w-full sm:max-w-xs" />
-            <div className="flex flex-col sm:flex-row gap-2 mt-2 w-full sm:max-w-xs">
-              <button className="bg-green-600 text-white text-xs sm:text-sm px-3 py-2 rounded hover:bg-green-700 transition w-full">Comprar</button>
-              <button className="bg-blue-600 text-white text-xs sm:text-sm px-3 py-2 rounded hover:bg-blue-700 transition w-full">Adicionar ao carrinho</button>
-            </div>
+          {/* Botão Adicionar ao carrinho */}
+          <div className="mt-4 flex flex-col gap-2 w-full">
+            <button
+              className="bg-blue-600 text-white text-xs sm:text-sm px-3 py-2 rounded hover:bg-blue-700 transition w-full"
+              onClick={async e => {
+                e.preventDefault();
+                if (!user) {
+                  toast.info('Faça login para adicionar produtos ao carrinho!', { position: 'top-center', autoClose: 2500 });
+                  setTimeout(() => {
+                    window.location.href = '/login';
+                  }, 2000);
+                  return;
+                }
+                try {
+                  // Verifica se já existe o item no carrinho do usuário
+                  const { data: existing, error: fetchError } = await supabase
+                    .from('cart_items')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('product_id', product.id)
+                    .maybeSingle();
+                  if (fetchError) throw fetchError;
+                  if (existing) {
+                    // Atualiza a quantidade
+                    const { error: updateError } = await supabase
+                      .from('cart_items')
+                      .update({ quantity: existing.quantity + 1 })
+                      .eq('id', existing.id);
+                    if (updateError) throw updateError;
+                  } else {
+                    // Insere novo item
+                    const { error: insertError } = await supabase
+                      .from('cart_items')
+                      .insert([
+                        {
+                          user_id: user.id,
+                          product_id: product.id,
+                          quantity: 1,
+                        },
+                      ]);
+                    if (insertError) throw insertError;
+                  }
+                  toast.success('Produto adicionado ao carrinho!', { position: 'top-right', autoClose: 2000 });
+                } catch (err: any) {
+                  toast.error('Erro ao adicionar ao carrinho: ' + (err?.message || '')); 
+                }
+              }}
+            >
+              Adicionar ao carrinho
+            </button>
           </div>
         </div>
       </Link>

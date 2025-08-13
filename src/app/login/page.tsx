@@ -38,18 +38,18 @@ export default function LoginPage() {
 
   return (
     <ProtectedRoute requireAuth={false}>
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-2">
         <div
-          className="flex w-full max-w-5xl bg-white rounded-xl shadow-lg overflow-hidden h-150"
+          className="flex flex-col md:flex-row w-full max-w-5xl bg-white rounded-xl shadow-lg overflow-hidden md:h-150 md:translate-x-[10vw]"
         >
           {/* Esquerda: Título */}
-          <div className="hidden md:flex flex-col justify-center items-start flex-1 p-12 bg-white">
-            <h2 className="text-4xl font-bold mb-4 text-gray-900">Digite seu e-mail<br />para iniciar sessão</h2>
+          <div className="flex flex-col justify-center items-center md:items-start flex-none md:flex-1 p-6 md:p-12 w-full md:w-auto md:translate-x-[10vw]">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 text-gray-900 text-center md:text-left">Digite seu e-mail<br />para iniciar sessão</h2>
           </div>
           {/* Direita: Card de login */}
-          <div className="flex-1 flex flex-col items-center justify-center p-8">
-            <div className="w-full max-w-md flex flex-col items-center justify-center">
-              <form className="bg-white flex flex-col items-center justify-center w-full" onSubmit={handleSubmit}>
+          <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 w-full z-20 relative">
+            <div className="w-full max-w-xs sm:max-w-md flex flex-col items-center justify-center z-30 relative">
+              <form className="flex flex-col items-center justify-center w-full" onSubmit={handleSubmit}>
                 <label className="block mb-2 text-gray-700 font-semibold self-center">E-mail</label>
                 <input
                   id="email"
@@ -84,13 +84,21 @@ export default function LoginPage() {
                   {isLoading ? "Continuando..." : "Continuar"}
                 </button>
               </form>
-              <div className="text-center my-2">
+              <div className="text-center my-2 flex flex-row gap-4 w-full justify-center text-blue-600">
                 <a
                   href="/register"
-                  className=" font-semibold hover:underline !opacity-100 text-gray-700"
-                  style={{ opacity: 1, color: '#2563eb' }}
+                  className="font-semibold hover:underline text-blue-600"
+                  style={{ opacity: 1 }}
                 >
                   Criar conta
+                </a>
+                <span>|</span>
+                <a
+                  href="/recovery"
+                  className="font-semibold hover:underline text-blue-600"
+                  style={{ opacity: 1 }}
+                >
+                  Esqueceu a senha?
                 </a>
               </div>
             </div>

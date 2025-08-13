@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from 'react';
+import { toast } from 'react-toastify';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link'; // ← ADICIONAR ESTA LINHA
 import { useAuth } from '../../hooks/useAuth';
@@ -35,22 +36,31 @@ function ResetPasswordContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!user) {
       setError('Sessão de recuperação inválida.');
       return;
     }
-
-    if (password !== confirmPassword) {
-      setError('As senhas não coincidem');
+    // Validação de senha forte (agora permite caracteres especiais)
+    const senhaForte = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+    if (!senhaForte.test(password)) {
+      const msg = 'A senha deve ter pelo menos 8 caracteres, incluindo letras e números.';
+      setError(msg);
+      toast.error('Senha inválida: ' + msg, { position: 'top-center', autoClose: 3000 });
       return;
     }
-
+    if (password !== confirmPassword) {
+      const msg = 'As senhas não coincidem. Por favor, digite novamente.';
+      setError(msg);
+      toast.error('Senhas diferentes: ' + msg, { position: 'top-center', autoClose: 3000 });
+      return;
+    }
     setLoading(true);
     try {
       await updatePassword(password);
-      alert('Senha atualizada com sucesso!');
-      router.push('/dashboard');
+      toast.success('Senha atualizada com sucesso!', { position: 'top-center', autoClose: 2000 });
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
     } catch (error: unknown) {
       // Função auxiliar para extrair mensagem de erro
       const getErrorMessage = (error: unknown): string => {
@@ -61,55 +71,63 @@ function ResetPasswordContent() {
         }
         return 'Erro ao atualizar senha';
       };
-      
       setError(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
   };
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Erro</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <Link href="/recovery" className="text-indigo-600 hover:text-indigo-500">
-            Solicitar novo link
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // Não bloqueia o formulário por erro de senha, só mostra feedback
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="max-w-md w-full space-y-4">
-        <h2 className="text-2xl font-bold text-center">Nova Senha</h2>
-        <input
-          type="password"
-          placeholder="Nova senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="w-full px-3 py-2 border rounded-md"
-        />
-        <input
-          type="password"
-          placeholder="Confirmar senha"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-          className="w-full px-3 py-2 border rounded-md"
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-indigo-600 text-white py-2 rounded-md disabled:opacity-50"
-        >
-          {loading ? 'Atualizando...' : 'Atualizar Senha'}
-        </button>
-      </form>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-2">
+      <div className="flex flex-col md:flex-row w-full max-w-5xl bg-white rounded-xl shadow-lg overflow-hidden md:h-150">
+        {/* Esquerda: Título */}
+        <div className="flex flex-col justify-center items-center md:items-start flex-none md:flex-1 p-6 md:p-12 w-full md:w-auto">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 text-gray-900 text-center md:text-left">Nova Senha</h2>
+          <p className="text-sm text-gray-600 text-center md:text-left">
+            Digite sua nova senha abaixo para redefinir o acesso à sua conta.<br />
+            <span className="font-semibold text-blue-700">A senha deve ter pelo menos 8 caracteres, incluindo letras e números.</span>
+          </p>
+        </div>
+        {/* Direita: Formulário de redefinição */}
+        <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 w-full">
+          <div className="w-full max-w-xs sm:max-w-md flex flex-col items-center justify-center">
+            <form className="flex flex-col items-center justify-center w-full" onSubmit={handleSubmit}>
+              <label className="block mb-2 text-gray-700 font-semibold self-center">Nova senha</label>
+              <input
+                type="password"
+                placeholder="Nova senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="mb-4 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900 w-full"
+              />
+              <label className="block mb-2 text-gray-700 font-semibold self-center">Confirmar senha</label>
+              <input
+                type="password"
+                placeholder="Confirmar senha"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="mb-4 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900 w-full"
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700 transition mb-2 disabled:opacity-60"
+              >
+                {loading ? 'Atualizando...' : 'Atualizar Senha'}
+              </button>
+            </form>
+            <div className="text-center mt-2">
+              <Link href="/login" className="text-blue-600 font-semibold hover:underline" style={{ color: '#2563eb' }}>
+                Voltar para Login
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

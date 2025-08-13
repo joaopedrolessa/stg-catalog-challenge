@@ -39,16 +39,16 @@ export default function RegisterPage() {
 
   return (
     <ProtectedRoute requireAuth={false}>
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex w-full max-w-5xl bg-white rounded-xl shadow-lg overflow-hidden h-150">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-2">
+        <div className="flex flex-col md:flex-row w-full max-w-5xl bg-white rounded-xl shadow-lg overflow-hidden md:h-150 md:translate-x-[10vw]">
           {/* Esquerda: Título */}
-          <div className="hidden md:flex flex-col justify-center items-start flex-1 p-12 bg-white">
-            <h2 className="text-4xl font-bold mb-4 text-gray-900">Crie sua conta<br />para acessar o catálogo</h2>
+          <div className="flex flex-col justify-center items-center md:items-start flex-none md:flex-1 p-6 md:p-12 w-full md:w-auto md:translate-x-[5vw]">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 text-gray-900 text-center md:text-left">Crie sua conta para acessar o site</h2>
           </div>
           {/* Direita: Card de registro */}
-          <div className="flex-1 flex flex-col items-center justify-center p-8">
-            <div className="w-full max-w-md flex flex-col items-center justify-center">
-              <form className="bg-white flex flex-col items-center justify-center w-full" onSubmit={handleSubmit}>
+          <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 w-full">
+            <div className="w-full max-w-xs sm:max-w-md flex flex-col items-center justify-center">
+              <form className="flex flex-col items-center justify-center w-full" onSubmit={handleSubmit}>
                 <label className="block mb-2 text-gray-700 font-semibold self-center">E-mail</label>
                 <input
                   id="email"
