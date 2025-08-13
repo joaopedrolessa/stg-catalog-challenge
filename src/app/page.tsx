@@ -1,3 +1,4 @@
+import Image from 'next/image';
 'use client';
 
 
@@ -33,7 +34,7 @@ export default function Home() {
               {[1,2,3,4].map((i) => (
                 <div key={i} className="transition-all duration-700 ease-out opacity-100 translate-y-0 w-full flex flex-col px-2 box-border min-h-[320px] bg-white rounded-xl shadow hover:shadow-lg">
                   <div className="relative w-full aspect-[2/1] bg-gray-100 overflow-hidden rounded-t-xl flex-shrink-0 mx-auto">
-                    <img src="/placeholder-product.png" alt="Produto" className="object-cover w-full h-full" />
+                    <Image src="/placeholder-product.png" alt="Produto" width={300} height={300} className="object-cover w-full h-full" />
                   </div>
                   <div className="px-3 pb-4 pt-2 flex flex-col gap-1 flex-1 overflow-hidden items-start text-left w-full">
                     <h3 className="text-base font-semibold text-gray-900 mb-1 line-clamp-2 min-h-[2rem] break-words truncate w-full">Produto {i}</h3>

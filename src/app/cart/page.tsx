@@ -1,3 +1,4 @@
+import Image from 'next/image';
 "use client";
 import { useEffect, useState } from "react";
 import { toast } from 'react-toastify';
@@ -198,7 +199,7 @@ export default function CartPage() {
                                         {items.map(item => (
                                             <div key={item.id} className="flex flex-col sm:flex-row items-center px-4 sm:px-12 py-4 sm:py-8 border-b last:border-b-0 text-base sm:text-[120%] gap-4 sm:gap-0">
                                                 <input type="checkbox" disabled className="accent-blue-500 mb-2 sm:mb-0 sm:mr-8 scale-125 sm:scale-150" />
-                                                <img src={item.product?.image_url} alt={item.product?.name} className="w-20 h-20 sm:w-28 sm:h-28 object-cover rounded border mb-2 sm:mb-0 sm:mr-8" />
+                                                <Image src={item.product?.image_url || '/placeholder-product.png'} alt={item.product?.name || 'Produto'} width={112} height={112} className="w-20 h-20 sm:w-28 sm:h-28 object-cover rounded border mb-2 sm:mb-0 sm:mr-8" />
                                                 <div className="flex-1 w-full">
                                                     <div className="font-bold text-base sm:text-xl mb-1 sm:mb-2 truncate max-w-xs text-gray-900">{item.product?.name}</div>
                                                     <button onClick={() => handleRemove(item.id)} className="text-blue-600 text-sm sm:text-base hover:underline">Excluir</button>
