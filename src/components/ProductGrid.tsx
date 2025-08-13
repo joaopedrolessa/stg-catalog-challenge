@@ -3,19 +3,14 @@ import { useProducts } from '../hooks/useProducts';
 import ProductCard from './ProductCard';
 import { Product } from '../types/product';
 
+import React from 'react';
 interface ProductGridProps {
   hideFilters?: boolean;
+  onProductClick?: (product: Product) => void;
 }
 
-export default function ProductGrid({ hideFilters = false }: ProductGridProps) {
+export default function ProductGrid({ hideFilters = false, onProductClick }: ProductGridProps) {
   const { products, loading, error, refetch } = useProducts();
-  // 🔍 ADICIONE ESTES LOGS PARA DEBUG:
-  console.log('🎯 Estado do ProductGrid:', {
-    products,
-    loading,
-    error,
-    productsLength: products.length
-  });
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
@@ -225,10 +220,11 @@ export default function ProductGrid({ hideFilters = false }: ProductGridProps) {
                   >
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full h-full">
                       {chunk.map((product) => (
-                        <ProductCard
-                          key={product.id}
-                          product={product}
-                        />
+                          <ProductCard
+                            key={product.id}
+                            product={product}
+                            onClick={onProductClick ? () => onProductClick(product) : undefined}
+                          />
                       ))}
                     </div>
                   </div>
@@ -242,6 +238,7 @@ export default function ProductGrid({ hideFilters = false }: ProductGridProps) {
                       <ProductCard
                         key={product.id}
                         product={product}
+                        onClick={onProductClick ? () => onProductClick(product) : undefined}
                       />
                     ))}
                   </div>

@@ -8,11 +8,12 @@ import { supabase } from '../services/supabaseClient';
 
 interface ProductCardProps {
   product: Product;
+  onClick?: () => void;
 }
 
 
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, onClick }: ProductCardProps) {
   const { user } = useAuth();
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -30,6 +31,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         href={`/produto/${product.id || product.uuid}`}
         className="flex flex-col hover:shadow-lg transition-shadow duration-300 cursor-pointer overflow-hidden group bg-white rounded-xl h-full w-full"
         prefetch={false}
+        onClick={onClick}
       >
         {/* Imagem do Produto */}
   <div className="relative w-full aspect-[2/1] sm:h-48 sm:aspect-auto bg-gray-100 overflow-hidden rounded-t-xl flex-shrink-0 mx-auto">
