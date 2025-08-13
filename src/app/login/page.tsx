@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 // import ProtectedRoute from '../../components/ProtectedRoute';
 import { useRouter } from 'next/navigation';
@@ -44,7 +44,7 @@ export default function LoginPage() {
         <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 w-full z-20 relative">
           <div className="w-full max-w-xs sm:max-w-md flex flex-col items-center justify-center z-30 relative">
             <form className="flex flex-col items-center justify-center w-full" onSubmit={handleSubmit}>
-              <label className="block mb-2 text-gray-700 font-semibold self-center">E-mail</label>
+              <label htmlFor="email" className="block mb-2 text-gray-700 font-semibold self-center">E-mail</label>
               <input
                 id="email"
                 name="email"
@@ -57,7 +57,7 @@ export default function LoginPage() {
                 placeholder="E-mail"
                 autoFocus
               />
-              <label className="block mb-2 text-gray-700 font-semibold self-center">Senha</label>
+              <label htmlFor="password" className="block mb-2 text-gray-700 font-semibold self-center">Senha</label>
               <input
                 id="password"
                 name="password"
