@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../hooks/useAuth';
+import { showToast } from '../../utils/toastManager';
 import ProtectedRoute from '../../components/ProtectedRoute';
 
 export default function RegisterPage() {
@@ -26,14 +27,23 @@ export default function RegisterPage() {
       return;
     }
 
+    // Verifica se o email já existe no Supabase antes de criar
+    const { data: userExists, error: fetchError } = await fetch(
+      `/api/check-email?email=${encodeURIComponent(email)}`
+    ).then(res => res.json());
+
+    if (fetchError || userExists?.exists) {
+      showToast('error', 'Este e-mail já está cadastrado. Faça login ou recupere sua senha.', { position: 'top-center', autoClose: 3000 });
+      setIsLoading(false);
+      return;
+    }
+
     const { error } = await signUp(email, password);
-    
     if (error) {
       setError(error.message);
     } else {
       setSuccess('Conta criada com sucesso! Verifique seu email para confirmar.');
     }
-    
     setIsLoading(false);
   };
 
@@ -43,7 +53,7 @@ export default function RegisterPage() {
         <div className="flex flex-col md:flex-row w-full max-w-5xl bg-white rounded-xl shadow-lg overflow-hidden md:h-150 md:translate-x-[10vw]">
           {/* Esquerda: Título */}
           <div className="flex flex-col justify-center items-center md:items-start flex-none md:flex-1 p-6 md:p-12 w-full md:w-auto md:translate-x-[5vw]">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 text-gray-900 text-center md:text-left">Crie sua conta para acessar o site</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 text-gray-900 text-center md:text-left">Crie sua conta <br />para acessar o site</h2>
           </div>
           {/* Direita: Card de registro */}
           <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 w-full">

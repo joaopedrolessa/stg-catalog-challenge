@@ -3,6 +3,7 @@
 
 import Image from 'next/image';
 import { toast } from 'react-toastify';
+import { showToast } from '../utils/toastManager';
 import { addToCart } from '../utils/cart';
 import HeroCarousel from '../components/HeroCarousel';
 import ProductGrid from '../components/ProductGrid';
@@ -51,18 +52,18 @@ export default function Home() {
                         className="bg-blue-600 text-white text-xs px-3 py-2 rounded hover:bg-blue-700 transition w-full"
                         onClick={async () => {
                           if (!user) {
-                            toast.error('Faça login para adicionar produtos ao carrinho!', { position: 'top-center', autoClose: 2500 });
+                            showToast('error', 'Faça login para adicionar produtos ao carrinho!', { position: 'top-center', autoClose: 2500 });
                             return;
                           }
                           try {
                             await addToCart(user.id, product.id || product.uuid, 1);
-                            toast.success('Produto adicionado ao carrinho!', { position: 'top-right', autoClose: 2000 });
+                            showToast('success', 'Produto adicionado ao carrinho!', { position: 'top-right', autoClose: 2000 });
                           } catch (err: unknown) {
                             let msg = '';
                             if (err && typeof err === 'object' && 'message' in err) {
                               msg = (err as { message?: string }).message || '';
                             }
-                            toast.error('Erro ao adicionar ao carrinho: ' + msg);
+                            showToast('error', 'Erro ao adicionar ao carrinho: ' + msg);
                           }
                         }}
                       >

@@ -1,6 +1,7 @@
 
 'use client';
 import { toast } from 'react-toastify';
+import { showToast } from '@/utils/toastManager';
 
 
 import { useEffect, useState } from 'react';
@@ -39,13 +40,13 @@ export default function ProdutoPage() {
 
   const handleAddToCart = async () => {
     if (!user) {
-      toast.error('Você precisa estar logado para adicionar ao carrinho.');
+  showToast('error', 'Você precisa estar logado para adicionar ao carrinho.');
       return;
     }
     setAdding(true);
     try {
       await addToCart(user.id, product!.id, 1);
-      toast.success('Produto adicionado ao carrinho!', {
+  showToast('success', 'Produto adicionado ao carrinho!', {
         position: 'top-center',
         autoClose: 2500,
         hideProgressBar: false,
@@ -57,7 +58,7 @@ export default function ProdutoPage() {
         style: { background: '#22c55e', color: '#fff', fontWeight: 'bold' },
       });
     } catch (e) {
-      toast.error('Erro ao adicionar ao carrinho.');
+  showToast('error', 'Erro ao adicionar ao carrinho.');
     } finally {
       setAdding(false);
     }

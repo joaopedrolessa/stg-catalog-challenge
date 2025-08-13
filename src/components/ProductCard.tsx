@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Product } from '../types/product';
 import { toast } from 'react-toastify';
+import { showToast } from '../utils/toastManager';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../services/supabaseClient';
 
@@ -65,7 +66,7 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
               onClick={async e => {
                 e.preventDefault();
                 if (!user) {
-                  toast.info('Faça login para adicionar produtos ao carrinho!', { position: 'top-center', autoClose: 2500 });
+                  showToast('info', 'Faça login para adicionar produtos ao carrinho!', { position: 'top-center', autoClose: 2500 });
                   setTimeout(() => {
                     window.location.href = '/login';
                   }, 2000);
@@ -100,13 +101,13 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
                       ]);
                     if (insertError) throw insertError;
                   }
-                  toast.success('Produto adicionado ao carrinho!', { position: 'top-right', autoClose: 2000 });
+                  showToast('success', 'Produto adicionado ao carrinho!', { position: 'top-right', autoClose: 2000 });
                 } catch (err: unknown) {
                   let msg = '';
                   if (err && typeof err === 'object' && 'message' in err) {
                     msg = (err as { message?: string }).message || '';
                   }
-                  toast.error('Erro ao adicionar ao carrinho: ' + msg);
+                  showToast('error', 'Erro ao adicionar ao carrinho: ' + msg);
                 }
               }}
             >
