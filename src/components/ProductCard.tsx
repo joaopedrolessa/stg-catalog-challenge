@@ -99,8 +99,12 @@ export default function ProductCard({ product }: ProductCardProps) {
                     if (insertError) throw insertError;
                   }
                   toast.success('Produto adicionado ao carrinho!', { position: 'top-right', autoClose: 2000 });
-                } catch (err: any) {
-                  toast.error('Erro ao adicionar ao carrinho: ' + (err?.message || '')); 
+                } catch (err: unknown) {
+                  let msg = '';
+                  if (err && typeof err === 'object' && 'message' in err) {
+                    msg = (err as { message?: string }).message || '';
+                  }
+                  toast.error('Erro ao adicionar ao carrinho: ' + msg);
                 }
               }}
             >
