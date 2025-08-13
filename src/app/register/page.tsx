@@ -21,6 +21,16 @@ export default function RegisterPage() {
     setError('');
     setSuccess('');
 
+
+    // Validação de senha forte igual à recuperação
+    const senhaForte = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+    if (!senhaForte.test(password)) {
+      const msg = 'A senha deve ter pelo menos 8 caracteres, incluindo letras e números.';
+      setError(msg);
+      showToast('error', 'Senha inválida: ' + msg, { position: 'top-center', autoClose: 3000 });
+      setIsLoading(false);
+      return;
+    }
     if (password !== confirmPassword) {
       setError('As senhas não coincidem');
       setIsLoading(false);

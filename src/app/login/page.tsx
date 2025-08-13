@@ -26,13 +26,8 @@ export default function LoginPage() {
       return;
     }
 
-    // Login OK -> tenta voltar para a rota anterior; se não houver, vai para a home
-    const canGoBack = typeof window !== 'undefined' && window.history.length > 1;
-    if (canGoBack) {
-      router.back();
-    } else {
-      router.push('/');
-    }
+  // Login OK -> sempre vai para a página inicial
+  router.push('/');
     setIsLoading(false);
   };
 
