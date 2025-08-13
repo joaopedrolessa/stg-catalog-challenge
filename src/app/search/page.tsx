@@ -74,19 +74,23 @@ function SearchContent() {
         setLoading(false);
       })();
     }
+    // Limpa o campo de busca ao sair da página
+    return () => {
+      setSearch('');
+    };
   }, [params]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto px-4">
-        <h1 className="text-2xl font-bold mb-4 text-center">🔎 Pesquisa de Produtos</h1>
+  <h1 className="text-2xl font-bold mb-4 text-center text-gray-900">Pesquisa de Produtos</h1>
         <form onSubmit={handleSearch} className="flex gap-2 mb-8">
           <input
             type="text"
             placeholder="Pesquisar por nome ou categoria"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-2 w-full"
+            className="border border-gray-300 rounded px-3 py-2 w-full text-gray-900 placeholder-gray-500"
           />
           <button
             type="submit"
@@ -114,12 +118,12 @@ function SearchContent() {
                   alt={product.name || product.category || 'Produto'}
                   className="h-40 object-cover rounded"
                 />
-                <div className="font-bold">{product.name || `Produto ${product.category}`}</div>
-                <div className="text-sm text-gray-600">Categoria: {product.category}</div>
+                <div className="font-bold text-gray-900">{product.name || `Produto ${product.category}`}</div>
+                <div className="text-sm text-gray-800">Categoria: {product.category}</div>
                 <div className="text-green-700 font-semibold">
                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
                 </div>
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-gray-700">
                   Criado em: {new Date(product.created_at).toLocaleString('pt-BR')}
                 </div>
               </div>
