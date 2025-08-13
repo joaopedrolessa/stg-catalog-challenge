@@ -84,7 +84,10 @@ export default function CartPage() {
     const [freteError, setFreteError] = useState('');
 
     useEffect(() => {
-        if (!user) return;
+        if (!user) {
+            setLoadingCart(false);
+            return;
+        }
         setLoadingCart(true);
         supabase
             .from("cart_items")
@@ -144,9 +147,15 @@ export default function CartPage() {
 
     if (!user) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-                <p className="text-lg">Você precisa estar logado para ver o carrinho.</p>
-                <Link href="/login" className="text-blue-600 hover:underline">Fazer login</Link>
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+                <div className="bg-white rounded-2xl shadow-xl flex flex-col items-center justify-center w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-md xl:max-w-lg p-6 sm:p-10 md:p-12 lg:p-14 xl:p-16 box-border"
+                    style={{ minHeight: '340px', minWidth: '280px', aspectRatio: '1/1' }}>
+                    <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 text-center">Acesso Restrito</h2>
+                    <p className="text-base md:text-lg text-gray-700 mb-8 text-center">Você precisa estar logado para visualizar o seu carrinho.</p>
+                    <div className="w-full flex justify-center">
+                        <Link href="/login" className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition text-base md:text-lg text-center">Fazer login</Link>
+                    </div>
+                </div>
             </div>
         );
     }

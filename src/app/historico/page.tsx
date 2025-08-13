@@ -1,6 +1,8 @@
 "use client";
+  
 import { useEffect, useState } from "react";
-import ProtectedRoute from "@/components/ProtectedRoute";
+// import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/services/supabaseClient";
 
 interface ProductInOrder {
@@ -21,13 +23,13 @@ interface Pedido {
 }
 
 export default function HistoricoPage() {
+  const { user, loading: authLoading } = useAuth();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchPedidos() {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setPedidos([]);
         setLoading(false);
@@ -42,52 +44,58 @@ export default function HistoricoPage() {
       setLoading(false);
     }
     fetchPedidos();
-  }, []);
+  }, [user]);
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 py-6 flex items-center justify-center">
-        <div className="w-full max-w-3xl mx-auto px-2 sm:px-4">
-          <h1 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-gray-900 text-center">Histórico de Compras</h1>
-          {loading ? (
-            <p className="text-center">Carregando...</p>
-          ) : pedidos.length === 0 ? (
-            <p className="text-center">Você ainda não fez nenhum pedido.</p>
-          ) : (
-            <ul className="space-y-4 sm:space-y-6">
-              {pedidos.map((pedido) => (
-                <li key={pedido.id} className="border rounded-xl p-3 sm:p-6 bg-white shadow flex flex-col items-center w-full">
-                  <div className="font-semibold text-gray-900 text-base sm:text-lg mb-1 text-center break-all">Pedido #{pedido.id}</div>
-                  <div className="text-xs sm:text-sm text-gray-700 mb-2 sm:mb-3 text-center">{new Date(pedido.created_at).toLocaleString()}</div>
-                  <div className="mb-2 w-full">
-                    <span className="font-medium text-gray-900">Produtos:</span>
-                    <ul className="flex flex-col items-center w-full">
-                      {pedido.items && pedido.items.map((prod, idx) => (
-                        <li key={idx} className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mb-2 w-full justify-center">
-                          {prod.image_url && (
-                            <img
-                              src={prod.image_url}
-                              alt={prod.name}
-                              className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded border mb-1 sm:mb-0"
-                            />
-                          )}
-                          <span className="font-semibold text-gray-900 text-center sm:text-left">{prod.name}</span>
-                          <span className="ml-0 sm:ml-2 text-gray-600 text-xs sm:text-sm">Qtd: {prod.quantity}</span>
-                          <span className="ml-0 sm:ml-2 text-gray-900 text-xs sm:text-base">R$ {prod.price}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="font-bold text-gray-900 text-base sm:text-lg">Total: R$ {pedido.total}</div>
-                  {pedido.frete !== undefined && (
-                    <div className="text-gray-700 text-xs sm:text-base">Frete: R$ {pedido.frete}</div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 py-10 flex items-center justify-center px-2 sm:px-4">
+      <div className="w-full max-w-3xl mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20">
+        <h1 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-gray-900 text-center">Histórico de Compras</h1>
+        {(authLoading || loading) ? (
+          <p className="text-center">Carregando...</p>
+        ) : !user ? (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white p-8 rounded-xl shadow-lg text-center w-11/12 max-w-md">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Acesso Restrito</h2>
+              <p className="text-base text-gray-700 mb-6">Você precisa estar logado para visualizar seu histórico de compras.</p>
+              <a href="/login" className="bg-blue-600 text-white px-6 py-2 rounded font-semibold hover:bg-blue-700 transition text-base inline-block">Fazer login</a>
+            </div>
+          </div>
+        ) : pedidos.length === 0 ? (
+          <p className="text-center">Você ainda não fez nenhum pedido.</p>
+        ) : (
+          <ul className="space-y-4 sm:space-y-6">
+            {pedidos.map((pedido) => (
+              <li key={pedido.id} className="border rounded-xl p-3 sm:p-6 bg-white shadow flex flex-col items-center w-full">
+                <div className="font-semibold text-gray-900 text-base sm:text-lg mb-1 text-center break-all">Pedido #{pedido.id}</div>
+                <div className="text-xs sm:text-sm text-gray-700 mb-2 sm:mb-3 text-center">{new Date(pedido.created_at).toLocaleString()}</div>
+                <div className="mb-2 w-full">
+                  <span className="font-medium text-gray-900">Produtos:</span>
+                  <ul className="flex flex-col items-center w-full">
+                    {pedido.items && pedido.items.map((prod, idx) => (
+                      <li key={idx} className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mb-2 w-full justify-center">
+                        {prod.image_url && (
+                          <img
+                            src={prod.image_url}
+                            alt={prod.name}
+                            className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded border mb-1 sm:mb-0"
+                          />
+                        )}
+                        <span className="font-semibold text-gray-900 text-center sm:text-left">{prod.name}</span>
+                        <span className="ml-0 sm:ml-2 text-gray-600 text-xs sm:text-sm">Qtd: {prod.quantity}</span>
+                        <span className="ml-0 sm:ml-2 text-gray-900 text-xs sm:text-base">R$ {prod.price}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="font-bold text-gray-900 text-base sm:text-lg">Total: R$ {pedido.total}</div>
+                {pedido.frete !== undefined && (
+                  <div className="text-gray-700 text-xs sm:text-base">Frete: R$ {pedido.frete}</div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
-    </ProtectedRoute>
+    </div>
   );
 }

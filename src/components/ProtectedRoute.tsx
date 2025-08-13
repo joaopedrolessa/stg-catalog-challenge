@@ -22,27 +22,22 @@ export default function ProtectedRoute({
   useEffect(() => {
     if (user !== undefined) {
       setIsLoading(false);
-      
-      if (requireAuth && !user) {
-        router.push(redirectTo);
-  }
     }
-  }, [user, router, requireAuth, redirectTo]);
+  }, [user]);
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="animate-spin rounded-full h-20 w-20 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
-  // Se requer autenticação e não há usuário, não renderiza nada
   if (requireAuth && !user) {
+    router.replace(redirectTo);
     return null;
   }
 
-  // Se não requer autenticação e há usuário, não renderiza nada
   if (!requireAuth && user) {
     return null;
   }
