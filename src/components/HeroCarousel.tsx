@@ -64,7 +64,7 @@ export default function HeroCarousel() {
               </h2>
               <p className="text-gray-600 text-base sm:text-lg lg:text-xl mb-8">
                 {coupon
-                  ? `Use o cupom ${coupon.code} e ganhe ${coupon.type === 'compra' ? `${coupon.value}% OFF na compra` : `${coupon.value}% OFF no frete`}${coupon.validade ? `. Válido até ${coupon.validade}` : ''}.`
+                  ? `Use o cupom ${coupon.code} e ganhe ${coupon.type === 'compra' ? `${coupon.value}% OFF na compra` : `${coupon.value}% OFF no frete`}.`
                   : 'Nenhum cupom ativo no momento.'}
               </p>
             </div>

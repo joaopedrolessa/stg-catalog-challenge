@@ -27,15 +27,15 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
 
 
   return (
-  <div className="transition-all duration-700 ease-out opacity-100 translate-y-0 w-full mx-auto h-full flex flex-col px-2 box-border min-h-[320px]">
+  <div className="w-full mx-auto h-full flex flex-col px-2 box-border min-h-[320px]">
       <Link
         href={`/produto/${product.id || product.uuid}`}
-        className="flex flex-col hover:shadow-lg transition-shadow duration-300 cursor-pointer overflow-hidden group bg-white rounded-xl h-full w-full"
+        className="flex flex-col cursor-pointer overflow-hidden bg-white rounded-xl h-full w-full"
         prefetch={false}
         onClick={onClick}
       >
         {/* Imagem do Produto */}
-  <div className="relative w-full aspect-[2/1] sm:h-48 sm:aspect-auto bg-gray-100 overflow-hidden rounded-t-xl flex-shrink-0 mx-auto">
+        <div className="relative w-full aspect-[2/1] sm:h-48 sm:aspect-auto bg-gray-100 overflow-hidden rounded-t-xl flex-shrink-0 mx-auto">
           <Image
             src={product.image_url || '/placeholder-product.png'}
             alt={product.name || 'Produto'}
@@ -45,7 +45,7 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
           />
         </div>
         {/* Conteúdo do Card */}
-  <div className="px-3 pb-4 pt-2 sm:p-4 flex flex-col gap-1 sm:gap-2 flex-1 overflow-hidden items-start text-left w-full">
+        <div className="px-3 pb-4 pt-2 sm:p-4 flex flex-col gap-1 sm:gap-2 flex-1 overflow-hidden items-start text-left w-full">
           {/* Título (nome do produto) */}
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] break-words truncate w-full">
             {product.name}
@@ -59,63 +59,63 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
           {product.category && (
             <span className="text-xs sm:text-sm text-gray-500 truncate w-full">Categoria: {product.category}</span>
           )}
-          {/* Botão Adicionar ao carrinho */}
-          <div className="mt-4 flex flex-col gap-2 w-full">
-            <button
-              className="bg-blue-600 text-white text-xs sm:text-sm px-3 py-2 rounded hover:bg-blue-700 transition w-full"
-              onClick={async e => {
-                e.preventDefault();
-                if (!user) {
-                  showToast('info', 'Faça login para adicionar produtos ao carrinho!', { position: 'top-center', autoClose: 2500 });
-                  setTimeout(() => {
-                    window.location.href = '/login';
-                  }, 2000);
-                  return;
-                }
-                try {
-                  // Verifica se já existe o item no carrinho do usuário
-                  const { data: existing, error: fetchError } = await supabase
-                    .from('cart_items')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .eq('product_id', product.id)
-                    .maybeSingle();
-                  if (fetchError) throw fetchError;
-                  if (existing) {
-                    // Atualiza a quantidade
-                    const { error: updateError } = await supabase
-                      .from('cart_items')
-                      .update({ quantity: existing.quantity + 1 })
-                      .eq('id', existing.id);
-                    if (updateError) throw updateError;
-                  } else {
-                    // Insere novo item
-                    const { error: insertError } = await supabase
-                      .from('cart_items')
-                      .insert([
-                        {
-                          user_id: user.id,
-                          product_id: product.id,
-                          quantity: 1,
-                        },
-                      ]);
-                    if (insertError) throw insertError;
-                  }
-                  showToast('success', 'Produto adicionado ao carrinho!', { position: 'top-right', autoClose: 2000 });
-                } catch (err: unknown) {
-                  let msg = '';
-                  if (err && typeof err === 'object' && 'message' in err) {
-                    msg = (err as { message?: string }).message || '';
-                  }
-                  showToast('error', 'Erro ao adicionar ao carrinho: ' + msg);
-                }
-              }}
-            >
-              Adicionar ao carrinho
-            </button>
-          </div>
         </div>
       </Link>
+      {/* Botão Adicionar ao carrinho fora do Link */}
+      <div className="mt-4 flex flex-col gap-2 w-full">
+        <button
+          className="bg-blue-600 text-white text-xs sm:text-sm px-3 py-2 rounded hover:bg-blue-700 transition w-full"
+          onClick={async e => {
+            e.preventDefault();
+            if (!user) {
+              showToast('info', 'Faça login para adicionar produtos ao carrinho!', { position: 'top-center', autoClose: 2500 });
+              setTimeout(() => {
+                window.location.href = '/login';
+              }, 2000);
+              return;
+            }
+            try {
+              // Verifica se já existe o item no carrinho do usuário
+              const { data: existing, error: fetchError } = await supabase
+                .from('cart_items')
+                .select('*')
+                .eq('user_id', user.id)
+                .eq('product_id', product.id)
+                .maybeSingle();
+              if (fetchError) throw fetchError;
+              if (existing) {
+                // Atualiza a quantidade
+                const { error: updateError } = await supabase
+                  .from('cart_items')
+                  .update({ quantity: existing.quantity + 1 })
+                  .eq('id', existing.id);
+                if (updateError) throw updateError;
+              } else {
+                // Insere novo item
+                const { error: insertError } = await supabase
+                  .from('cart_items')
+                  .insert([
+                    {
+                      user_id: user.id,
+                      product_id: product.id,
+                      quantity: 1,
+                    },
+                  ]);
+                if (insertError) throw insertError;
+              }
+              showToast('success', 'Produto adicionado ao carrinho!', { position: 'top-right', autoClose: 2000 });
+            } catch (err: unknown) {
+              let msg = '';
+              if (err && typeof err === 'object' && 'message' in err) {
+                msg = (err as { message?: string }).message || '';
+              }
+              showToast('error', 'Erro ao adicionar ao carrinho: ' + msg);
+            }
+          }}
+        >
+          Adicionar ao carrinho
+        </button>
+      </div>
     </div>
   );
 }
