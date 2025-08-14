@@ -64,7 +64,7 @@ export default function Navbar() {
           href="/"
           aria-label="Ir para a página inicial"
           className="flex items-center h-12 min-h-0 flex-shrink-0 text-white font-bold tracking-tight text-lg md:text-xl whitespace-nowrap hover:opacity-90 transition-opacity"
-          style={{ lineHeight: '1.2' }}
+          style={{ lineHeight: '1.2', marginLeft: '4%' }}
         >
           STG Catalog
         </Link>
@@ -186,7 +186,7 @@ export default function Navbar() {
                         className="block px-4 py-2 rounded-lg !text-black hover:bg-blue-50 hover:!text-blue-700 transition-colors font-medium"
                         onClick={() => setMenuOpen(false)}
                       >
-                        Minhas compras
+                        <span style={{marginLeft: '-2%'}}>Minhas compras</span>
                       </Link>
                       <button
                         className="block w-full text-left px-4 py-2 rounded-lg !text-black hover:bg-red-50 hover:!text-red-700 transition-colors font-medium"
@@ -251,7 +251,7 @@ export default function Navbar() {
                       <circle cx="12" cy="7" r="4" />
                       <path d="M5.5 21a7.5 7.5 0 0113 0" />
                     </svg>
-                    Minhas compras
+                    <span style={{marginLeft: '-2%'}}>Minhas compras</span>
                   </Link>
                   <button className="flex items-center gap-2 text-red-700 font-bold text-lg py-2 px-3 rounded hover:bg-red-50" style={{color:'#b91c1c'}} onClick={() => { handleLogout(); setDrawerOpen(false); }}>
                     <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">

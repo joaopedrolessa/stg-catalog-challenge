@@ -1,6 +1,7 @@
 
 "use client";
 import { useEffect, useState } from "react";
+import { validateCoupon, Coupon } from "../../services/couponService";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../hooks/useAuth";
@@ -23,7 +24,12 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [frete, setFrete] = useState<number>(0);
+  const [subtotal, setSubtotal] = useState(0);
   const [total, setTotal] = useState(0);
+  const [couponCode, setCouponCode] = useState("");
+  const [coupon, setCoupon] = useState<Coupon | null>(null);
+  const [couponError, setCouponError] = useState("");
+  const [discount, setDiscount] = useState(0);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -34,12 +40,25 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
-    const subtotal = cart.reduce(
+    const sub = cart.reduce(
       (sum, item) => sum + (item.product?.price || 0) * item.quantity,
       0
     );
-    setTotal(subtotal + (frete || 0));
-  }, [cart, frete]);
+    setSubtotal(sub);
+  }, [cart]);
+
+  useEffect(() => {
+    let desc = 0;
+    if (coupon) {
+      if (coupon.type === "compra") {
+        desc = subtotal * (coupon.value / 100);
+      } else if (coupon.type === "frete") {
+        desc = frete * (coupon.value / 100);
+      }
+    }
+    setDiscount(desc);
+    setTotal(subtotal + frete - desc);
+  }, [subtotal, frete, coupon]);
 
   if (cart.length === 0) {
     return (
@@ -56,6 +75,10 @@ export default function CheckoutPage() {
       mensagem += `• ${item.product?.name} (Qtd: ${item.quantity}) - R$ ${(item.product?.price * item.quantity).toFixed(2)}%0A`;
     });
     mensagem += `Frete: R$ ${(frete || 0).toFixed(2)}%0A`;
+    if (coupon) {
+      mensagem += `Cupom: ${coupon.code} (${coupon.type === "compra" ? "Desconto na compra" : "Desconto no frete"} - ${coupon.value}%)%0A`;
+      mensagem += `Desconto: -R$ ${discount.toFixed(2)}%0A`;
+    }
     mensagem += `Total: R$ ${total.toFixed(2)}`;
     return mensagem;
   }
@@ -126,10 +149,56 @@ export default function CheckoutPage() {
             </li>
           ))}
         </ul>
+        {/* Cupom de desconto */}
+        <div className="mb-4">
+          <label htmlFor="cupom" className="block text-sm font-medium text-gray-700 mb-1">Cupom de desconto</label>
+          <div className="flex gap-2">
+            <input
+              id="cupom"
+              type="text"
+              className="border rounded px-3 py-2 w-32 focus:outline-none focus:ring-2 focus:ring-blue-200 text-gray-900"
+              value={couponCode}
+              onChange={e => setCouponCode(e.target.value.toUpperCase())}
+              placeholder="Digite o cupom"
+              maxLength={20}
+            />
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              type="button"
+              onClick={async () => {
+                setCouponError("");
+                setCoupon(null);
+                if (!couponCode) {
+                  setCouponError("Digite o código do cupom.");
+                  return;
+                }
+                const result = await validateCoupon(couponCode);
+                if (!result) {
+                  setCouponError("Cupom inválido ou expirado.");
+                  return;
+                }
+                setCoupon(result);
+                toast.success("Cupom aplicado com sucesso!");
+              }}
+            >Aplicar</button>
+          </div>
+          {couponError && <div className="text-red-600 text-sm mt-1">{couponError}</div>}
+          {coupon && (
+            <div className="text-green-700 text-sm mt-1">
+              Cupom <b>{coupon.code}</b> aplicado: {coupon.type === "compra" ? `Desconto de ${coupon.value}% na compra` : `Desconto de ${coupon.value}% no frete`}.
+            </div>
+          )}
+        </div>
         <div className="mb-2 flex justify-between text-gray-700">
           <span>Frete</span>
           <span className="font-semibold">R$ {(frete || 0).toFixed(2)}</span>
         </div>
+        {coupon && discount > 0 && (
+          <div className="mb-2 flex justify-between text-gray-700">
+            <span>Desconto ({coupon.code})</span>
+            <span className="font-semibold text-green-700">-R$ {discount.toFixed(2)}</span>
+          </div>
+        )}
         <div className="mb-6 flex justify-between text-xl font-bold text-gray-900">
           <span>Total</span>
           <span className="text-green-700">R$ {total.toFixed(2)}</span>
