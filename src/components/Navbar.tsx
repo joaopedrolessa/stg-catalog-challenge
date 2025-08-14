@@ -1,4 +1,12 @@
 "use client";
+/**
+ * Navbar responsiva com:
+ * - Logo e busca
+ * - Links principais (catálogo, carrinho)
+ * - Menu de conta (login / histórico / logout)
+ * - Drawer lateral em mobile
+ * - Busca que redireciona para /search?q=...
+ */
 
 
 import Link from "next/link";

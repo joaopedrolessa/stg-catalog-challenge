@@ -1,13 +1,18 @@
+/**
+ * Hook de autenticação que encapsula integração com Supabase Auth.
+ * Fornece usuário atual, estado de carregamento e helpers de login/logout/signup/reset/update password.
+ */
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../services/supabaseClient';
 
+/** Retorna estado e ações de autenticação */
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Função para obter a sessão inicial
+    // Obtém sessão inicial (SSR friendly se for adaptado)
     const getInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
@@ -16,9 +21,9 @@ export function useAuth() {
 
     getInitialSession();
 
-    // Escutar mudanças no estado de autenticação
+    // Escuta mudanças de auth (login/logout / token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event, session) => {
         setUser(session?.user ?? null);
         setLoading(false);
       }
@@ -27,71 +32,49 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Função para fazer login
+  /** Login com email+senha */
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     return { data, error };
   };
 
-  // Função para fazer signup
+  /** Cadastro de novo usuário */
   const signUp = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const { data, error } = await supabase.auth.signUp({ email, password });
     return { data, error };
   };
 
-  // Função para fazer logout
+  /** Logout */
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     return { error };
   };
 
-const resetPassword = async (email: string) => {
+  /** Envia email de recuperação de senha */
+  const resetPassword = async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
-      
-      if (error) {
-        throw error;
-      }
-      
-      return { success: true };
+      if (error) throw error;
+      return { success: true } as const;
     } catch (error: unknown) {
       console.error('Erro ao enviar email de recuperação:', error);
       throw error;
     }
   };
 
+  /** Atualiza senha do usuário logado (após token de recuperação) */
   const updatePassword = async (newPassword: string) => {
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
-      return { success: true };
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      return { success: true } as const;
     } catch (error: unknown) {
       console.error('Erro ao atualizar senha:', error);
       throw error;
     }
   };
 
-  return {
-    user,
-    loading,
-    signIn,
-    signUp,
-    signOut,
-    resetPassword,
-    updatePassword
-  };
+  return { user, loading, signIn, signUp, signOut, resetPassword, updatePassword };
 }

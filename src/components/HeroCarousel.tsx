@@ -1,8 +1,11 @@
 'use client';
+/**
+ * Carousel simples para exibir cupons pré-definidos.
+ * Faz autoplay trocando o índice a cada 4.5s (pausa no hover) e permite navegar manualmente.
+ */
 import { useEffect, useRef, useState } from 'react';
-import { supabase } from '../services/supabaseClient';
-import type { Coupon } from '../services/couponService';
 
+// Lista estática de cupons (não consulta servidor)
 const predefinedCoupons = [
   { code: 'DESCONTO10', description: '10% OFF em todas as compras!' },
   { code: 'FRETEGRATIS', description: 'Frete grátis em todas as compras!' },
@@ -10,25 +13,25 @@ const predefinedCoupons = [
 ];
 
 export default function HeroCarousel() {
-  const [index, setIndex] = useState(0);
-  const [hover, setHover] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [index, setIndex] = useState(0);           // slide atual
+  const [hover, setHover] = useState(false);       // pausa autoplay quando true
+  const timerRef = useRef<NodeJS.Timeout | null>(null); // referência do intervalo
 
+  // Autoplay
   useEffect(() => {
-    if (hover) return;
+    if (hover) return; // pausa se o usuário está sobre o componente
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
-      setIndex((i) => (predefinedCoupons.length ? (i + 1) % predefinedCoupons.length : 0));
+      setIndex(i => (predefinedCoupons.length ? (i + 1) % predefinedCoupons.length : 0));
     }, 4500);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [hover]);
 
+  // Navegação manual
   const go = (dir: 1 | -1) => {
-    setIndex((i) => {
+    setIndex(i => {
       const next = i + dir;
-      if (predefinedCoupons.length === 0) return 0;
+      if (!predefinedCoupons.length) return 0;
       if (next < 0) return predefinedCoupons.length - 1;
       if (next >= predefinedCoupons.length) return 0;
       return next;
@@ -41,7 +44,7 @@ export default function HeroCarousel() {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      {/* Track */}
+      {/* Faixa de slides */}
       <div
         className="flex transition-transform duration-700 ease-out"
         style={{ transform: `translateX(-${index * 100}vw)`, width: `${(predefinedCoupons.length || 1) * 100}vw` }}
@@ -63,7 +66,7 @@ export default function HeroCarousel() {
         ))}
       </div>
 
-      {/* Controls */}
+      {/* Controles / botões de navegação */}
       <button
         aria-label="Slide anterior"
         onClick={() => go(-1)}
@@ -81,7 +84,7 @@ export default function HeroCarousel() {
         ▶
       </button>
 
-      {/* Dots */}
+      {/* Indicadores (dots) */}
       <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
         {predefinedCoupons.map((_, i) => (
           <button

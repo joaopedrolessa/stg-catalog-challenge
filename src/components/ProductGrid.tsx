@@ -1,102 +1,71 @@
+/**
+ * Grid de produtos com filtros opcionais (categoria, faixa de preço, ordenação).
+ * Quando hideFilters=true é usado no homepage para exibir 'blocos' chunked com animação on-scroll.
+ */
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import ProductCard from './ProductCard';
 import { Product } from '../types/product';
 
-import React from 'react';
-interface ProductGridProps {
-  hideFilters?: boolean;
-  onProductClick?: (product: Product) => void;
-}
+interface ProductGridProps { hideFilters?: boolean; onProductClick?: (product: Product) => void; }
 
 export default function ProductGrid({ hideFilters = false, onProductClick }: ProductGridProps) {
   const { products, loading, error, refetch } = useProducts();
 
+  // Estados de filtro/ordenação
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
   const [minValue, setMinValue] = useState<string>('');
   const [maxValue, setMaxValue] = useState<string>('');
-  // Normaliza categorias para unicidade real, mas mantém o nome original para exibição
-  const categories = Array.from(new Set(products.map(product => product.category))).filter(Boolean);
 
-  // Chunk logic for home page
-  function chunkArray<T>(arr: T[], size: number): T[][] {
-    const result = [];
-    for (let i = 0; i < arr.length; i += size) {
-      result.push(arr.slice(i, i + size));
-    }
-    return result;
-  }
+  // Lista única de categorias não-vazias
+  const categories = Array.from(new Set(products.map(p => p.category))).filter(Boolean);
 
-  // Filter and sort products before chunking
+  // Utilitário de chunk para homepage
+  function chunkArray<T>(arr: T[], size: number): T[][] { const r: T[][] = []; for (let i=0;i<arr.length;i+=size) r.push(arr.slice(i,i+size)); return r; }
+
+  // Aplica filtros e ordenação
   const filteredAndSortedProducts = products
-    .filter(product =>
-      (selectedCategory === 'all' || product.category === selectedCategory)
-    )
-    .filter(product =>
-      (minValue === '' || product.price >= parseFloat(minValue)) &&
-      (maxValue === '' || product.price <= parseFloat(maxValue))
-    )
+    .filter(p => (selectedCategory === 'all' || p.category === selectedCategory))
+    .filter(p => (minValue === '' || p.price >= parseFloat(minValue)) && (maxValue === '' || p.price <= parseFloat(maxValue)))
     .sort((a, b) => {
       switch (sortBy) {
-        case 'price-low':
-          return a.price - b.price;
-        case 'price-high':
-          return b.price - a.price;
-        case 'name-az': {
-          const nameA = a.name || '';
-          const nameB = b.name || '';
-          return nameA.localeCompare(nameB);
-        }
-        case 'name-za': {
-          const nameA = a.name || '';
-          const nameB = b.name || '';
-          return nameB.localeCompare(nameA);
-        }
-        case 'newest':
-        default:
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case 'price-low': return a.price - b.price;
+        case 'price-high': return b.price - a.price;
+        case 'name-az': return (a.name||'').localeCompare(b.name||'');
+        case 'name-za': return (b.name||'').localeCompare(a.name||'');
+        case 'newest': default: return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
 
+  // Chunk somente se hideFilters (homepage)
+  const productChunks = useMemo(() => hideFilters ? chunkArray(filteredAndSortedProducts, 8) : [filteredAndSortedProducts], [hideFilters, filteredAndSortedProducts]);
 
-  // Only chunk for main page (hideFilters), memoized
-  const productChunks = useMemo(() => (
-    hideFilters
-      ? chunkArray(filteredAndSortedProducts, 8)
-      : [filteredAndSortedProducts]
-  ), [hideFilters, filteredAndSortedProducts]);
-
+  // Observa blocos para animar entrada
   const blockRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [visibleBlocks, setVisibleBlocks] = useState<number[]>([]);
   useEffect(() => {
     if (!hideFilters) return;
     const observers: IntersectionObserver[] = [];
     blockRefs.current = blockRefs.current.slice(0, productChunks.length);
-    productChunks.forEach((_: Product[], idx: number) => {
+    productChunks.forEach((_, idx) => {
       const ref = blockRefs.current[idx];
       if (!ref) return;
-      const observer = new window.IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setVisibleBlocks((prev) =>
-                prev.includes(idx) ? prev : [...prev, idx]
-              );
-              observer.disconnect();
-            }
-          });
-        },
-        { threshold: 0.2 }
-      );
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            setVisibleBlocks(prev => prev.includes(idx) ? prev : [...prev, idx]);
+            observer.disconnect();
+          }
+        });
+      }, { threshold: 0.2 });
       observer.observe(ref);
       observers.push(observer);
     });
-    return () => {
-      observers.forEach((obs) => obs.disconnect());
-    };
+    return () => observers.forEach(o => o.disconnect());
   }, [hideFilters, productChunks]);
 
+  // Estados de carregamento/erro
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -136,10 +105,10 @@ export default function ProductGrid({ hideFilters = false, onProductClick }: Pro
   }
 
   return (
-  <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 flex flex-col items-center">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 flex flex-col items-center">
       {/* Filtros e ordenação */}
       {!hideFilters && (
-  <div className="w-full flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
+        <div className="w-full flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
           {/* Sidebar de filtros */}
           <aside className="w-full sm:w-64 bg-white p-4 sm:p-6 rounded-lg shadow mb-4 sm:mb-8 sticky top-20 sm:top-24 self-start flex-shrink-0">
             {/* Ordenação em primeiro */}
@@ -248,7 +217,6 @@ export default function ProductGrid({ hideFilters = false, onProductClick }: Pro
           </div>
         </div>
       )}
-  {/* (Bloco duplicado removido) */}
     </div>
   );
 }
